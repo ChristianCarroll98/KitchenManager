@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace KitchenManager.KMAPI.Data.Migrations
 {
-    public partial class CreateIdentitySchema : Migration
+    public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -32,8 +32,8 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     LastName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),
+                    NormalizedEmail = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: false),
                     EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     PasswordHash = table.Column<string>(type: "char(84)", unicode: false, fixedLength: true, maxLength: 84, nullable: true),
                     SecurityStamp = table.Column<string>(type: "varchar(36)", unicode: false, maxLength: 36, nullable: false),
@@ -51,6 +51,21 @@ namespace KitchenManager.KMAPI.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ItemTypes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    IconPath = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ItemTypes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -59,7 +74,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     RoleId = table.Column<int>(type: "int", nullable: false),
                     ClaimType = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: true),
                     ClaimValue = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: true),
-                    Discriminator = table.Column<string>(type: "varchar(256)", nullable: true)
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -81,7 +96,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false),
                     ClaimType = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: true),
                     ClaimValue = table.Column<string>(type: "varchar(256)", unicode: false, maxLength: 256, nullable: true),
-                    Discriminator = table.Column<string>(type: "varchar(256)", nullable: true)
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -102,7 +117,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    Discriminator = table.Column<string>(type: "varchar(256)", nullable: true)
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -147,7 +162,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Value = table.Column<string>(type: "varchar(1000)", unicode: false, maxLength: 1000, nullable: true),
-                    Discriminator = table.Column<string>(type: "varchar(256)", nullable: true)
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -158,6 +173,95 @@ namespace KitchenManager.KMAPI.Data.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserLists",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    IconPath = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    KMUserId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserLists", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserLists_AspNetUsers_KMUserId",
+                        column: x => x.KMUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_UserLists_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ItemTemplates",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TypeId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    ExpirationDays = table.Column<int>(type: "int", nullable: false),
+                    IconPath = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ItemTemplates", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ItemTemplates_ItemTypes_TypeId",
+                        column: x => x.TypeId,
+                        principalTable: "ItemTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ListItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ListId = table.Column<int>(type: "int", nullable: false),
+                    TypeId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    ExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IconPath = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    UserListId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ListItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ListItems_ItemTypes_TypeId",
+                        column: x => x.TypeId,
+                        principalTable: "ItemTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ListItems_UserLists_ListId",
+                        column: x => x.ListId,
+                        principalTable: "UserLists",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ListItems_UserLists_UserListId",
+                        column: x => x.UserListId,
+                        principalTable: "UserLists",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -198,6 +302,36 @@ namespace KitchenManager.KMAPI.Data.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ItemTemplates_TypeId",
+                table: "ItemTemplates",
+                column: "TypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ListItems_ListId",
+                table: "ListItems",
+                column: "ListId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ListItems_TypeId",
+                table: "ListItems",
+                column: "TypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ListItems_UserListId",
+                table: "ListItems",
+                column: "UserListId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserLists_KMUserId",
+                table: "UserLists",
+                column: "KMUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserLists_UserId",
+                table: "UserLists",
+                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -218,7 +352,19 @@ namespace KitchenManager.KMAPI.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "ItemTemplates");
+
+            migrationBuilder.DropTable(
+                name: "ListItems");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "ItemTypes");
+
+            migrationBuilder.DropTable(
+                name: "UserLists");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

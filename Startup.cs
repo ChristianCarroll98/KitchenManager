@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 using KitchenManager.KMAPI.KMRole;
 using KitchenManager.KMAPI.KMUser;
@@ -37,6 +38,11 @@ namespace KitchenManager
 
             services.AddControllersWithViews();
 
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc(name: "v1", new OpenApiInfo { Title = "KitchenManager API", Version = "v1" });
+            });
+
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
@@ -57,6 +63,13 @@ namespace KitchenManager
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c => 
+            {
+                c.SwaggerEndpoint(url: "/swagger/v1/swagger.json", name: "Kitchen Manager V1.0");
+            });
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

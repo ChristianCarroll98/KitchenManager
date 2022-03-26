@@ -18,6 +18,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,14 +26,6 @@
     <Content Remove="$(SpaRoot)**" />
     <None Remove="$(SpaRoot)**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="KMAPI\Data\Migrations\" />
-    <Folder Include="KMAPI\ItemTemplates\" />
-    <Folder Include="KMAPI\ItemTypes\" />
-    <Folder Include="KMAPI\ListItems\" />
-    <Folder Include="KMAPI\UserLists\" />
   </ItemGroup>
 
   <ItemGroup>
