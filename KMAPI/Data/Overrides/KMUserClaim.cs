@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KitchenManager.KMAPI.Data
+namespace KitchenManager.KMAPI
 {
     public class KMUserClaim : IdentityUserClaim<int>
     {

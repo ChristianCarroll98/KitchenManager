@@ -5,16 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using KitchenManager.KMAPI.KMRole;
-using KitchenManager.KMAPI.KMUser;
 using Microsoft.EntityFrameworkCore;
 
-using KitchenManager.KMAPI.Data;
-using KitchenManager.KMAPI.UserLists;
-using KitchenManager.KMAPI.ListItems;
-using KitchenManager.KMAPI.ItemTypes;
-using KitchenManager.KMAPI.ItemTemplates;
+using KitchenManager.KMAPI;
 
 namespace KitchenManager.Data
 {
@@ -107,11 +100,9 @@ namespace KitchenManager.Data
                     .IsRequired(true);
 
                 b.Property(user => user.Email)
-                    .IsUnicode(false)
                     .IsRequired(true);
                 
                 b.Property(user => user.NormalizedEmail)
-                   .IsUnicode(false)
                    .IsRequired(true);
             });
 

@@ -19,7 +19,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
                 .HasAnnotation("ProductVersion", "5.0.15")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("KitchenManager.KMAPI.ItemTemplates.ItemTemplate", b =>
+            modelBuilder.Entity("KitchenManager.KMAPI.ItemTemplate", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -52,7 +52,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     b.ToTable("ItemTemplates");
                 });
 
-            modelBuilder.Entity("KitchenManager.KMAPI.ItemTypes.ItemType", b =>
+            modelBuilder.Entity("KitchenManager.KMAPI.ItemType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -77,7 +77,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     b.ToTable("ItemTypes");
                 });
 
-            modelBuilder.Entity("KitchenManager.KMAPI.KMRole.KMRole", b =>
+            modelBuilder.Entity("KitchenManager.KMAPI.KMRole", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -110,7 +110,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     b.ToTable("AspNetRoles");
                 });
 
-            modelBuilder.Entity("KitchenManager.KMAPI.KMUser.KMUser", b =>
+            modelBuilder.Entity("KitchenManager.KMAPI.KMUser", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -131,8 +131,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
@@ -154,8 +153,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     b.Property<string>("NormalizedEmail")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
@@ -203,7 +201,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("KitchenManager.KMAPI.ListItems.ListItem", b =>
+            modelBuilder.Entity("KitchenManager.KMAPI.ListItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -246,7 +244,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     b.ToTable("ListItems");
                 });
 
-            modelBuilder.Entity("KitchenManager.KMAPI.UserLists.UserList", b =>
+            modelBuilder.Entity("KitchenManager.KMAPI.UserList", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -423,69 +421,69 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUserToken<int>");
                 });
 
-            modelBuilder.Entity("KitchenManager.KMAPI.Data.KMRoleClaim", b =>
+            modelBuilder.Entity("KitchenManager.KMAPI.KMRoleClaim", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>");
 
                     b.HasDiscriminator().HasValue("KMRoleClaim");
                 });
 
-            modelBuilder.Entity("KitchenManager.KMAPI.Data.KMUserClaim", b =>
+            modelBuilder.Entity("KitchenManager.KMAPI.KMUserClaim", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>");
 
                     b.HasDiscriminator().HasValue("KMUserClaim");
                 });
 
-            modelBuilder.Entity("KitchenManager.KMAPI.Data.KMUserLogin", b =>
+            modelBuilder.Entity("KitchenManager.KMAPI.KMUserLogin", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>");
 
                     b.HasDiscriminator().HasValue("KMUserLogin");
                 });
 
-            modelBuilder.Entity("KitchenManager.KMAPI.Data.KMUserToken", b =>
+            modelBuilder.Entity("KitchenManager.KMAPI.KMUserToken", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUserToken<int>");
 
                     b.HasDiscriminator().HasValue("KMUserToken");
                 });
 
-            modelBuilder.Entity("KitchenManager.KMAPI.ItemTemplates.ItemTemplate", b =>
+            modelBuilder.Entity("KitchenManager.KMAPI.ItemTemplate", b =>
                 {
-                    b.HasOne("KitchenManager.KMAPI.ItemTypes.ItemType", null)
+                    b.HasOne("KitchenManager.KMAPI.ItemType", null)
                         .WithMany()
                         .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("KitchenManager.KMAPI.ListItems.ListItem", b =>
+            modelBuilder.Entity("KitchenManager.KMAPI.ListItem", b =>
                 {
-                    b.HasOne("KitchenManager.KMAPI.UserLists.UserList", null)
+                    b.HasOne("KitchenManager.KMAPI.UserList", null)
                         .WithMany()
                         .HasForeignKey("ListId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("KitchenManager.KMAPI.ItemTypes.ItemType", null)
+                    b.HasOne("KitchenManager.KMAPI.ItemType", null)
                         .WithMany()
                         .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("KitchenManager.KMAPI.UserLists.UserList", null)
+                    b.HasOne("KitchenManager.KMAPI.UserList", null)
                         .WithMany("ListItems")
                         .HasForeignKey("UserListId");
                 });
 
-            modelBuilder.Entity("KitchenManager.KMAPI.UserLists.UserList", b =>
+            modelBuilder.Entity("KitchenManager.KMAPI.UserList", b =>
                 {
-                    b.HasOne("KitchenManager.KMAPI.KMUser.KMUser", null)
+                    b.HasOne("KitchenManager.KMAPI.KMUser", null)
                         .WithMany("Userlists")
                         .HasForeignKey("KMUserId");
 
-                    b.HasOne("KitchenManager.KMAPI.KMUser.KMUser", null)
+                    b.HasOne("KitchenManager.KMAPI.KMUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -494,7 +492,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
-                    b.HasOne("KitchenManager.KMAPI.KMRole.KMRole", null)
+                    b.HasOne("KitchenManager.KMAPI.KMRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -503,7 +501,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
-                    b.HasOne("KitchenManager.KMAPI.KMUser.KMUser", null)
+                    b.HasOne("KitchenManager.KMAPI.KMUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -512,7 +510,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
-                    b.HasOne("KitchenManager.KMAPI.KMUser.KMUser", null)
+                    b.HasOne("KitchenManager.KMAPI.KMUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -521,13 +519,13 @@ namespace KitchenManager.KMAPI.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
                 {
-                    b.HasOne("KitchenManager.KMAPI.KMRole.KMRole", null)
+                    b.HasOne("KitchenManager.KMAPI.KMRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("KitchenManager.KMAPI.KMUser.KMUser", null)
+                    b.HasOne("KitchenManager.KMAPI.KMUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -536,19 +534,19 @@ namespace KitchenManager.KMAPI.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.HasOne("KitchenManager.KMAPI.KMUser.KMUser", null)
+                    b.HasOne("KitchenManager.KMAPI.KMUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("KitchenManager.KMAPI.KMUser.KMUser", b =>
+            modelBuilder.Entity("KitchenManager.KMAPI.KMUser", b =>
                 {
                     b.Navigation("Userlists");
                 });
 
-            modelBuilder.Entity("KitchenManager.KMAPI.UserLists.UserList", b =>
+            modelBuilder.Entity("KitchenManager.KMAPI.UserList", b =>
                 {
                     b.Navigation("ListItems");
                 });

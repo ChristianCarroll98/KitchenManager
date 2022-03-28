@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KitchenManager.KMAPI.ItemTemplates
+namespace KitchenManager.KMAPI
 {
     public class ItemTemplate
     {

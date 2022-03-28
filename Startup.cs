@@ -8,9 +8,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
-using KitchenManager.KMAPI.KMRole;
-using KitchenManager.KMAPI.KMUser;
+using KitchenManager.KMAPI;
 using KitchenManager.Data;
+using KitchenManager.Seed;
 
 namespace KitchenManager
 {
@@ -35,6 +35,8 @@ namespace KitchenManager
             {
                 options.UseSqlServer(Configuration.GetConnectionString("KMData"));
             });
+
+            services.AddTransient<KMSeeder>();
 
             services.AddControllersWithViews();
 
