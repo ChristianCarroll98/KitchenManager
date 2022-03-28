@@ -41,8 +41,10 @@ namespace KitchenManager.Seed
 
             if (!(context.Roles.Any()))
             {
-                await roleManager.CreateAsync(new KMRole("Admin"));
-                await roleManager.CreateAsync(new KMRole("User"));
+                await roleManager.CreateAsync(new KMRole() { Name = "Admin" });
+                await roleManager.CreateAsync(new KMRole() { Name = "User" });
+
+                context.SaveChanges();
             }
             
             if (!context.Users.Any())
@@ -136,18 +138,22 @@ namespace KitchenManager.Seed
                         }
                     }
                 }
+
+                context.SaveChanges();
             }
 
-            if (!(context.ItemTypes.Any()))
+            if (!(context.ItemTags.Any()))
             {
-                //Add Item Types
-                context.ItemTypes.Add(new ItemType() { Name = "Fruit" });
-                context.ItemTypes.Add(new ItemType() { Name = "Vegitable" });
-                context.ItemTypes.Add(new ItemType() { Name = "Poultry" });
-                context.ItemTypes.Add(new ItemType() { Name = "Fish" });
-                context.ItemTypes.Add(new ItemType() { Name = "Meat" });
-                context.ItemTypes.Add(new ItemType() { Name = "Leftovers", Description = "Saving it for later!" });
-                context.ItemTypes.Add(new ItemType() { Name = "Other", Description = "Anything that doesnt quite fit into other categories." });
+                //Add Item Tags
+                context.ItemTags.Add(new ItemTag() { Name = "Fruit" });
+                context.ItemTags.Add(new ItemTag() { Name = "Vegitable" });
+                context.ItemTags.Add(new ItemTag() { Name = "Poultry" });
+                context.ItemTags.Add(new ItemTag() { Name = "Fish" });
+                context.ItemTags.Add(new ItemTag() { Name = "Meat" });
+                context.ItemTags.Add(new ItemTag() { Name = "Leftovers" });
+                context.ItemTags.Add(new ItemTag() { Name = "Spice" });
+
+                context.SaveChanges();
             }
 
             if(!(context.ItemTemplates.Any()))
@@ -159,10 +165,9 @@ namespace KitchenManager.Seed
 
                 foreach (var itemTemplateSeedModel in itemTemplateData)
                 {
-                    
+
                     var itemTemplate = new ItemTemplate()
                     {
-                        TypeId = itemTemplateSeedModel.TypeId,
                         Name = itemTemplateSeedModel.Name,
                         Description = itemTemplateSeedModel.Description,
                         ExpirationDays = itemTemplateSeedModel.ExpirationDays
@@ -170,6 +175,21 @@ namespace KitchenManager.Seed
 
                     context.ItemTemplates.Add(itemTemplate);
                 }
+
+                context.SaveChanges();
+            }
+
+            if (context.ItemTemplates.Any()) // make sure there are item templates
+            {
+                foreach (var itemTemplate in context.ItemTemplates.Where(it => !it.ItemTags.Any()).ToList()) // if any dont have tags, add them.
+                {
+                    var takeNum = rand.Next(1, 4);
+                    var itemTags = context.ItemTags.OrderBy(g => Guid.NewGuid()).Skip(rand.Next(context.ItemTags.Count() - takeNum)).Take(takeNum).ToList();
+
+                    itemTemplate.ItemTags = itemTags;
+                }
+
+                context.SaveChanges();
             }
 
             if(!(context.UserLists.Any()))
@@ -200,6 +220,8 @@ namespace KitchenManager.Seed
                         context.UserLists.Add(userList);
                     }
                 }
+
+                context.SaveChanges();
             }
 
             if (!(context.ListItems.Any())){
@@ -215,17 +237,28 @@ namespace KitchenManager.Seed
                         var listItem = new ListItem()
                         {
                             ListId = userList.Id,
-                            TypeId = itemTemplate.TypeId,
                             Name = itemTemplate.Name,
                             Description = itemTemplate.Description,
-                            ExpirationDate = DateTime.UtcNow.AddDays(itemTemplate.ExpirationDays).Date
+                            ExpirationDate = DateTime.UtcNow.AddDays(itemTemplate.ExpirationDays).Date,
                         };
-
-                        context.ListItems.Add(listItem);
                     }
                 }
-            }
+
                 context.SaveChanges();
+            }
+
+            if (context.ListItems.Any()) // make sure there are list items
+            {
+                foreach (var listItem in context.ListItems.Where(it => !it.ItemTags.Any()).ToList()) // if any dont have tags, add them.
+                {
+                    var takeNum = rand.Next(1, 4);
+                    var itemTags = context.ItemTags.OrderBy(g => Guid.NewGuid()).Skip(rand.Next(context.ItemTags.Count() - takeNum)).Take(takeNum).ToList();
+
+                    listItem.ItemTags = itemTags;
+                }
+
+                context.SaveChanges();
+            }
         }
     }
 }

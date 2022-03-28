@@ -7,16 +7,10 @@ using System.Threading.Tasks;
 
 namespace KitchenManager.KMAPI
 {
-    public class ListItem
+    public class ItemTemplate
     {
         [Required]
         public int Id { get; set; }
-
-        [Required]
-        public int ListId { get; set; }
-
-        [Required]
-        public int TypeId { get; set; }
 
         [Required]
         [MaxLength(256)]
@@ -25,10 +19,12 @@ namespace KitchenManager.KMAPI
         [MaxLength(256)]
         public string Description { get; set; }
 
-        public DateTime ExpirationDate { get; set; }
+        public int ExpirationDays { get; set; }
 
         [MaxLength(256)]
         [Column(TypeName = "varchar(256)")]
         public string IconPath { get; set; }
+
+        public List<ItemTag> ItemTags { get; set; }
     }
 }

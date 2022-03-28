@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KitchenManager.KMAPI.Data.Migrations
 {
     [DbContext(typeof(KMDbContext))]
-    [Migration("20220327012106_InitialMigration")]
+    [Migration("20220328210255_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,6 +20,53 @@ namespace KitchenManager.KMAPI.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.15")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("ItemTagItemTemplate", b =>
+                {
+                    b.Property<int>("ItemTagsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ItemTemplatesId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ItemTagsId", "ItemTemplatesId");
+
+                    b.HasIndex("ItemTemplatesId");
+
+                    b.ToTable("ItemTagItemTemplate");
+                });
+
+            modelBuilder.Entity("ItemTagListItem", b =>
+                {
+                    b.Property<int>("ItemTagsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ListItemsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ItemTagsId", "ListItemsId");
+
+                    b.HasIndex("ListItemsId");
+
+                    b.ToTable("ItemTagListItem");
+                });
+
+            modelBuilder.Entity("KitchenManager.KMAPI.ItemTag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ItemTags");
+                });
 
             modelBuilder.Entity("KitchenManager.KMAPI.ItemTemplate", b =>
                 {
@@ -44,39 +91,9 @@ namespace KitchenManager.KMAPI.Data.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<int>("TypeId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("TypeId");
 
                     b.ToTable("ItemTemplates");
-                });
-
-            modelBuilder.Entity("KitchenManager.KMAPI.ItemType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("IconPath")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ItemTypes");
                 });
 
             modelBuilder.Entity("KitchenManager.KMAPI.KMRole", b =>
@@ -229,7 +246,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<int>("TypeId")
+                    b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.Property<int?>("UserListId")
@@ -238,8 +255,6 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ListId");
-
-                    b.HasIndex("TypeId");
 
                     b.HasIndex("UserListId");
 
@@ -451,11 +466,32 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     b.HasDiscriminator().HasValue("KMUserToken");
                 });
 
-            modelBuilder.Entity("KitchenManager.KMAPI.ItemTemplate", b =>
+            modelBuilder.Entity("ItemTagItemTemplate", b =>
                 {
-                    b.HasOne("KitchenManager.KMAPI.ItemType", null)
+                    b.HasOne("KitchenManager.KMAPI.ItemTag", null)
                         .WithMany()
-                        .HasForeignKey("TypeId")
+                        .HasForeignKey("ItemTagsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KitchenManager.KMAPI.ItemTemplate", null)
+                        .WithMany()
+                        .HasForeignKey("ItemTemplatesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ItemTagListItem", b =>
+                {
+                    b.HasOne("KitchenManager.KMAPI.ItemTag", null)
+                        .WithMany()
+                        .HasForeignKey("ItemTagsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("KitchenManager.KMAPI.ListItem", null)
+                        .WithMany()
+                        .HasForeignKey("ListItemsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -465,12 +501,6 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     b.HasOne("KitchenManager.KMAPI.UserList", null)
                         .WithMany()
                         .HasForeignKey("ListId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("KitchenManager.KMAPI.ItemType", null)
-                        .WithMany()
-                        .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

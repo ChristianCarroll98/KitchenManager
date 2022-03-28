@@ -51,18 +51,32 @@ namespace KitchenManager.KMAPI.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ItemTypes",
+                name: "ItemTags",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ItemTags", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ItemTemplates",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    ExpirationDays = table.Column<int>(type: "int", nullable: false),
                     IconPath = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ItemTypes", x => x.Id);
+                    table.PrimaryKey("PK_ItemTemplates", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -205,24 +219,25 @@ namespace KitchenManager.KMAPI.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ItemTemplates",
+                name: "ItemTagItemTemplate",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TypeId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    ExpirationDays = table.Column<int>(type: "int", nullable: false),
-                    IconPath = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                    ItemTagsId = table.Column<int>(type: "int", nullable: false),
+                    ItemTemplatesId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ItemTemplates", x => x.Id);
+                    table.PrimaryKey("PK_ItemTagItemTemplate", x => new { x.ItemTagsId, x.ItemTemplatesId });
                     table.ForeignKey(
-                        name: "FK_ItemTemplates_ItemTypes_TypeId",
-                        column: x => x.TypeId,
-                        principalTable: "ItemTypes",
+                        name: "FK_ItemTagItemTemplate_ItemTags_ItemTagsId",
+                        column: x => x.ItemTagsId,
+                        principalTable: "ItemTags",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ItemTagItemTemplate_ItemTemplates_ItemTemplatesId",
+                        column: x => x.ItemTemplatesId,
+                        principalTable: "ItemTemplates",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -234,9 +249,9 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ListId = table.Column<int>(type: "int", nullable: false),
-                    TypeId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
                     ExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IconPath = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
                     UserListId = table.Column<int>(type: "int", nullable: true)
@@ -244,12 +259,6 @@ namespace KitchenManager.KMAPI.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ListItems", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ListItems_ItemTypes_TypeId",
-                        column: x => x.TypeId,
-                        principalTable: "ItemTypes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ListItems_UserLists_ListId",
                         column: x => x.ListId,
@@ -262,6 +271,30 @@ namespace KitchenManager.KMAPI.Data.Migrations
                         principalTable: "UserLists",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ItemTagListItem",
+                columns: table => new
+                {
+                    ItemTagsId = table.Column<int>(type: "int", nullable: false),
+                    ListItemsId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ItemTagListItem", x => new { x.ItemTagsId, x.ListItemsId });
+                    table.ForeignKey(
+                        name: "FK_ItemTagListItem_ItemTags_ItemTagsId",
+                        column: x => x.ItemTagsId,
+                        principalTable: "ItemTags",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ItemTagListItem_ListItems_ListItemsId",
+                        column: x => x.ListItemsId,
+                        principalTable: "ListItems",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -304,19 +337,19 @@ namespace KitchenManager.KMAPI.Data.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ItemTemplates_TypeId",
-                table: "ItemTemplates",
-                column: "TypeId");
+                name: "IX_ItemTagItemTemplate_ItemTemplatesId",
+                table: "ItemTagItemTemplate",
+                column: "ItemTemplatesId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ItemTagListItem_ListItemsId",
+                table: "ItemTagListItem",
+                column: "ListItemsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ListItems_ListId",
                 table: "ListItems",
                 column: "ListId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ListItems_TypeId",
-                table: "ListItems",
-                column: "TypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ListItems_UserListId",
@@ -352,16 +385,22 @@ namespace KitchenManager.KMAPI.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "ItemTemplates");
+                name: "ItemTagItemTemplate");
 
             migrationBuilder.DropTable(
-                name: "ListItems");
+                name: "ItemTagListItem");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "ItemTypes");
+                name: "ItemTemplates");
+
+            migrationBuilder.DropTable(
+                name: "ItemTags");
+
+            migrationBuilder.DropTable(
+                name: "ListItems");
 
             migrationBuilder.DropTable(
                 name: "UserLists");

@@ -7,25 +7,18 @@ using System.Threading.Tasks;
 
 namespace KitchenManager.KMAPI
 {
-    public class ItemTemplate
+    public class ItemTag
     {
         [Required]
         public int Id { get; set; }
 
         [Required]
-        public int TypeId { get; set; }
-
-        [Required]
         [MaxLength(256)]
         public string Name { get; set; }
 
-        [MaxLength(256)]
-        public string Description { get; set; }
-
-        public int ExpirationDays { get; set; }
-
-        [MaxLength(256)]
-        [Column(TypeName = "varchar(256)")]
-        public string IconPath { get; set; }
+        //public List<ItemTagItemTemplateJoinModel> ItemTemplates { get; set; }
+        public List<ItemTemplate> ItemTemplates { get; set; }
+        //public List<ItemTagListItemJoinModel> ListItems { get; set; }
+        public List<ListItem> ListItems { get; set; }
     }
 }

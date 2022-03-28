@@ -15,7 +15,7 @@ namespace KitchenManager.Data
     {
         public DbSet<UserList> UserLists { get; set; }
         public DbSet<ListItem> ListItems { get; set; }
-        public DbSet<ItemType> ItemTypes { get; set; }
+        public DbSet<ItemTag> ItemTags { get; set; }
         public DbSet<ItemTemplate> ItemTemplates { get; set; }
 
         public KMDbContext(DbContextOptions<KMDbContext> options) : base(options)
@@ -140,33 +140,50 @@ namespace KitchenManager.Data
                     .WithMany()
                     .HasForeignKey(li => li.ListId);
 
-                b.Property(li => li.TypeId)
-                    .IsRequired();
-
-                b.HasOne<ItemType>()
-                    .WithMany()
-                    .HasForeignKey(li => li.TypeId);
-
                 b.ToTable("ListItems");
             });
 
-            builder.Entity<ItemType>(b =>
+            /*builder.Entity<ItemTagItemTemplateJoinModel>(b =>
+            {
+                b.HasKey(jm => new { jm.ItemTagId, jm.ItemTemplateId });
+
+                b.HasOne<ItemTag>()
+                    .WithMany()
+                    .HasForeignKey(jm => jm.ItemTagId);
+
+                b.HasOne<ItemTemplate>()
+                    .WithMany()
+                    .HasForeignKey(jm => jm.ItemTemplateId);
+
+                b.ToTable("ItemTagItemTemplateJoinModels");
+            });
+
+            builder.Entity<ItemTagListItemJoinModel>(b =>
+            {
+                b.HasKey(jm => new { jm.ItemTagId, jm.ListItemId });
+
+                b.HasOne<ItemTag>()
+                    .WithMany()
+                    .HasForeignKey(jm => jm.ItemTagId);
+
+                b.HasOne<ListItem>()
+                    .WithMany()
+                    .HasForeignKey(jm => jm.ListItemId);
+                    
+
+                b.ToTable("ItemTagListItemJoinModels");
+            });*/
+
+            builder.Entity<ItemTag>(b =>
             {
                 b.HasKey(it => it.Id);
 
-                b.ToTable("ItemTypes");
+                b.ToTable("ItemTags");
             });
 
             builder.Entity<ItemTemplate>(b =>
             {
                 b.HasKey(it => it.Id);
-
-                b.Property(it => it.TypeId)
-                    .IsRequired();
-
-                b.HasOne<ItemType>()
-                    .WithMany()
-                    .HasForeignKey(it => it.TypeId);
 
                 b.ToTable("ItemTemplates");
             });
