@@ -7,25 +7,15 @@ using System.Threading.Tasks;
 
 namespace KitchenManager.KMAPI
 {
-    public class UserList
+    public class ItemTag
     {
         [Required]
         public int Id { get; set; }
 
         [Required]
-        public int UserId { get; set; }
-
-        [Required]
         [MaxLength(256)]
         public string Name { get; set; }
 
-        [MaxLength(256)]
-        public string Description { get; set; }
-
-        [MaxLength(256)]
-        [Column(TypeName = "varchar(256)")]
-        public string IconPath { get; set; }
-
-        public List<ListItem> ListItems { get; set; }
+        public List<Item> Items { get; set; }
     }
 }

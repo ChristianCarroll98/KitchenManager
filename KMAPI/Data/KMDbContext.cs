@@ -11,7 +11,7 @@ using KitchenManager.KMAPI;
 
 namespace KitchenManager.Data
 {
-    public class KMDbContext : IdentityDbContext<KMUser, KMRole, int>
+    public class KMDbContext : IdentityDbContext<KMUser, IdentityRole<int>, int>
     {
         public DbSet<UserList> UserLists { get; set; }
         public DbSet<ListItem> ListItems { get; set; }
@@ -26,77 +26,89 @@ namespace KitchenManager.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<KMRoleClaim>(b =>
+            builder.Entity<Item>(b =>
             {
-                b.Property(roleClaim =>roleClaim.ClaimType)
-                    .IsUnicode(false)
-                    .IsFixedLength(false)
+                b.HasKey(i => i.Id);
+
+                b.HasDiscriminator(i => i.Discriminator);
+
+                b.ToTable("Items");
+            });
+
+            //overrides for Id column
+            builder.Entity<IdentityUserRole<int>>(b =>
+            {
+                b.ToTable("UserRoles");
+            });
+
+            builder.Entity<IdentityRole<int>>(b => 
+            {
+                b.Property(role => role.ConcurrencyStamp)
+                   .IsUnicode(false)
+                   .IsFixedLength(true)
+                   .HasMaxLength(36)
+                   .IsRequired(true);
+
+                b.ToTable("Roles");
+            });
+
+            builder.Entity<IdentityRoleClaim<int>>(b => 
+            {
+                b.Property(roleClaim => roleClaim.ClaimType)
                     .HasMaxLength(256);
 
                 b.Property(roleClaim => roleClaim.ClaimValue)
-                    .IsUnicode(false)
-                    .IsFixedLength(false)
                     .HasMaxLength(256);
+
+                b.ToTable("RoleClaims");
             });
 
-            builder.Entity<KMUserClaim>(b =>
+            builder.Entity<IdentityUserClaim<int>>(b =>
             {
                 b.Property(userClaim => userClaim.ClaimType)
-                    .IsUnicode(false)
-                    .IsFixedLength(false)
                     .HasMaxLength(256);
 
                 b.Property(userClaim => userClaim.ClaimValue)
-                    .IsUnicode(false)
-                    .IsFixedLength(false)
                     .HasMaxLength(256);
+
+                b.ToTable("UserClaims");
             });
 
-            builder.Entity<KMUserLogin>(b =>
+            builder.Entity<IdentityUserLogin<int>>(b =>
             {
                 b.Property(userLogin => userLogin.ProviderDisplayName)
-                    .IsFixedLength(false)
-                    .HasMaxLength(256);
+                        .HasMaxLength(256);
 
+                b.ToTable("UserLogins");
             });
 
-            builder.Entity<KMUserToken>(b =>
+            builder.Entity<IdentityUserToken<int>>(b =>
             {
                 b.Property(userToken => userToken.Value)
                     .IsUnicode(false)
-                    .IsFixedLength(false)
                     .HasMaxLength(1000);
 
+                b.ToTable("UserTokens");
             });
 
             builder.Entity<KMUser>(b =>
             {
-                b.Property(user => user.FirstName)
-                    .HasMaxLength(256);
-
-                b.Property(user => user.LastName)
-                    .HasMaxLength(256);
-
                 b.Property(user => user.PhoneNumber)
                     .IsUnicode(false)
-                    .IsFixedLength(false)
                     .HasMaxLength(15);
 
                 b.Property(user => user.PasswordHash)
                     .IsUnicode(false)
-                    .IsFixedLength(true)
-                    .HasMaxLength(84);
+                    .HasMaxLength(256);
 
                 b.Property(user => user.ConcurrencyStamp)
                     .IsUnicode(false)
-                    .IsFixedLength(true)
-                    .HasMaxLength(36)
+                    .HasMaxLength(256)
                     .IsRequired(true);
 
                 b.Property(user => user.SecurityStamp)
                     .IsUnicode(false)
-                    .IsFixedLength(false)
-                    .HasMaxLength(36)
+                    .HasMaxLength(256)
                     .IsRequired(true);
 
                 b.Property(user => user.Email)
@@ -104,43 +116,39 @@ namespace KitchenManager.Data
                 
                 b.Property(user => user.NormalizedEmail)
                    .IsRequired(true);
-            });
 
-            builder.Entity<KMRole>(b =>
-            {
-                b.Property(r => r.ConcurrencyStamp)
-                    .IsUnicode(false)
-                    .IsFixedLength(true)
-                    .HasMaxLength(36)
-                    .IsRequired(true);
+                b.ToTable("Users");
             });
 
             builder.Entity<UserList>(b =>
             {
                 b.HasKey(ul => ul.Id);
 
-                b.Property(ul => ul.UserId)
+                b.Property(ul => ul.KMUserId)
                     .IsRequired();
 
-                b.HasOne<KMUser>()
-                    .WithMany()
-                    .HasForeignKey(ul => ul.UserId);
+                //b.HasOne<KMUser>()
+                //    .WithMany()
+                //    .HasForeignKey(ul => ul.UserId);
 
                 b.ToTable("UserLists");
             });
 
             builder.Entity<ListItem>(b =>
             {
-                b.HasKey(li => li.Id);
-
-                b.Property(li => li.ListId)
+                b.Property(li => li.UserListId)
                     .IsRequired();
 
-                b.HasOne<UserList>()
-                    .WithMany()
-                    .HasForeignKey(li => li.ListId);
+                //b.HasOne<UserList>()
+                //    .WithMany()
+                //    .HasForeignKey(li => li.UserListId);
 
-                b.ToTable("ListItems");
+                b.HasBaseType<Item>();
+            });
+
+            builder.Entity<ItemTemplate>(b =>
+            {
+                b.HasBaseType<Item>();
             });
 
             builder.Entity<ItemTag>(b =>
@@ -148,13 +156,6 @@ namespace KitchenManager.Data
                 b.HasKey(it => it.Id);
 
                 b.ToTable("ItemTags");
-            });
-
-            builder.Entity<ItemTemplate>(b =>
-            {
-                b.HasKey(it => it.Id);
-
-                b.ToTable("ItemTemplates");
             });
         }
     }

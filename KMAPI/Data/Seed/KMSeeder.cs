@@ -15,11 +15,11 @@ namespace KitchenManager.Seed
     {
         private readonly KMDbContext context;
         private readonly UserManager<KMUser> userManager;
-        private readonly RoleManager<KMRole> roleManager;
+        private readonly RoleManager<IdentityRole<int>> roleManager;
         public string RootPath { get; set; }
         public Random rand;
 
-        public KMSeeder(KMDbContext ctx, UserManager<KMUser> um, RoleManager<KMRole> rm)
+        public KMSeeder(KMDbContext ctx, UserManager<KMUser> um, RoleManager<IdentityRole<int>> rm)
         {
             context = ctx;
             userManager = um;
@@ -34,17 +34,19 @@ namespace KitchenManager.Seed
             
             if (clearData)
             {
-                context.Database.EnsureDeleted();
+                await context.Database.EnsureDeletedAsync();
+                Console.Write("Database deleted.");
             }
             
-            context.Database.EnsureCreated();
+            await context.Database.EnsureCreatedAsync();
+            Console.Write("Database Exists or Created.");
 
-            if (!(context.Roles.Any()))
+            if (!(await context.Roles.AnyAsync()))
             {
-                await roleManager.CreateAsync(new KMRole() { Name = "Admin" });
-                await roleManager.CreateAsync(new KMRole() { Name = "User" });
+                await roleManager.CreateAsync(new IdentityRole<int>() { Name = "Admin" });
+                await roleManager.CreateAsync(new IdentityRole<int>() { Name = "User" });
 
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
             
             if (!context.Users.Any())
@@ -61,8 +63,6 @@ namespace KitchenManager.Seed
                     {
                         admin = new KMUser()
                         {
-                            FirstName = adminSeedModel.FirstName,
-                            LastName = adminSeedModel.LastName,
                             UserName = adminSeedModel.UserName,
                             Email = adminSeedModel.Email,
                             NormalizedEmail = adminSeedModel.Email.Normalize()
@@ -91,6 +91,20 @@ namespace KitchenManager.Seed
                         {
                             throw new InvalidOperationException("Cant find new Admin in seeder to add Role");
                         }
+
+                        await context.UserClaims.AddAsync(new IdentityUserClaim<int>()
+                        {
+                            UserId = newAdmin.Id,
+                            ClaimType = "First Name",
+                            ClaimValue = adminSeedModel.FirstName
+                        });
+
+                        await context.UserClaims.AddAsync(new IdentityUserClaim<int>()
+                        {
+                            UserId = newAdmin.Id,
+                            ClaimType = "Last Name",
+                            ClaimValue = adminSeedModel.LastName
+                        });
                     }
                 }
 
@@ -106,8 +120,6 @@ namespace KitchenManager.Seed
                     {
                         user = new KMUser()
                         {
-                            FirstName = userSeedModel.FirstName,
-                            LastName = userSeedModel.LastName,
                             UserName = userSeedModel.UserName,
                             Email = userSeedModel.Email,
                             NormalizedEmail = userSeedModel.Email.Normalize()
@@ -136,27 +148,41 @@ namespace KitchenManager.Seed
                         {
                             throw new InvalidOperationException("Cant find new User in seeder to add Role");
                         }
+
+                        await context.UserClaims.AddAsync(new IdentityUserClaim<int>()
+                        {
+                            UserId = newUser.Id,
+                            ClaimType = "First Name",
+                            ClaimValue = userSeedModel.FirstName
+                        });
+
+                        await context.UserClaims.AddAsync(new IdentityUserClaim<int>()
+                        {
+                            UserId = newUser.Id,
+                            ClaimType = "Last Name",
+                            ClaimValue = userSeedModel.LastName
+                        });
                     }
                 }
 
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
-            if (!(context.ItemTags.Any()))
+            if (!(await context.ItemTags.AnyAsync()))
             {
                 //Add Item Tags
-                context.ItemTags.Add(new ItemTag() { Name = "Fruit" });
-                context.ItemTags.Add(new ItemTag() { Name = "Vegitable" });
-                context.ItemTags.Add(new ItemTag() { Name = "Poultry" });
-                context.ItemTags.Add(new ItemTag() { Name = "Fish" });
-                context.ItemTags.Add(new ItemTag() { Name = "Meat" });
-                context.ItemTags.Add(new ItemTag() { Name = "Leftovers" });
-                context.ItemTags.Add(new ItemTag() { Name = "Spice" });
+                await context.ItemTags.AddAsync(new ItemTag() { Name = "Fruit" });
+                await context.ItemTags.AddAsync(new ItemTag() { Name = "Vegitable" });
+                await context.ItemTags.AddAsync(new ItemTag() { Name = "Poultry" });
+                await context.ItemTags.AddAsync(new ItemTag() { Name = "Fish" });
+                await context.ItemTags.AddAsync(new ItemTag() { Name = "Meat" });
+                await context.ItemTags.AddAsync(new ItemTag() { Name = "Leftovers" });
+                await context.ItemTags.AddAsync(new ItemTag() { Name = "Spice" });
 
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
-            if(!(context.ItemTemplates.Any()))
+            if(!(await context.ItemTemplates.AnyAsync()))
             {
                 //Add ItemTemplates
                 var filePathItemTemplate = Path.Combine(RootPath, "KMAPI/Data/Seed/SeedData/SeedItemTemplates.json");
@@ -174,70 +200,64 @@ namespace KitchenManager.Seed
                         ExpirationDays = itemTemplateSeedModel.ExpirationDays
                     };
 
-                    context.ItemTemplates.Add(itemTemplate);
-                }
-
-                context.SaveChanges();
-            }
-
-            if (context.ItemTemplates.Any()) // make sure there are item templates
-            {
-                foreach (var itemTemplate in context.ItemTemplates.Where(it => !it.ItemTags.Any()).ToList()) // if any dont have tags, add them.
-                {
                     var takeNum = rand.Next(1, 4);
-                    var itemTags = context.ItemTags.OrderBy(g => Guid.NewGuid()).Skip(rand.Next(context.ItemTags.Count() - takeNum)).Take(takeNum).ToList();
+                    var itemTags = await context.ItemTags.OrderBy(g => Guid.NewGuid()).Skip(rand.Next(context.ItemTags.Count() - takeNum)).Take(takeNum).ToListAsync();
 
                     itemTemplate.ItemTags = itemTags;
+
+                    await context.ItemTemplates.AddAsync(itemTemplate);
                 }
 
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
-            if(!(context.UserLists.Any()))
+            if(!(await context.UserLists.AnyAsync()))
             {
-                foreach (var user in context.Users)
+                foreach (var user in context.Users.ToList())
                 {
+                    var firstName = (await context.UserClaims.Where(uc => uc.UserId == user.Id).FirstOrDefaultAsync()).ClaimValue;
+
                     var userList = new UserList()
                     {
-                        UserId = user.Id,
-                        Name = user.FirstName + "'s first list",
+                        KMUserId = user.Id,
+                        Name = firstName + "'s first list",
                         Description = "A list of random fake ingredient items."
                         
                     };
 
-                    context.UserLists.Add(userList);
+                    await context.UserLists.AddAsync(userList);
 
                     //test multiple lists for some test users
                     if( rand.Next() % 3 == 0 ){
 
                         userList = new UserList()
                         {
-                            UserId = user.Id,
-                            Name = user.FirstName + "'s second list",
+                            KMUserId = user.Id,
+                            Name = firstName + "'s second list",
                             Description = "A list of random fake ingredient items."
 
                         };
 
-                        context.UserLists.Add(userList);
+                        await context.UserLists.AddAsync(userList);
                     }
                 }
 
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
 
-            if (!(context.ListItems.Any())){
+            if (!(await context.ListItems.AnyAsync())){
                 //Add ListItems
-                foreach (var userList in context.UserLists.ToList())
+                foreach (var userList in (await context.UserLists.ToListAsync()))
                 {
                     //add random number of items to each list
                     foreach (var i in Enumerable.Range(0, rand.Next(20)))
                     {
                         //get random itemTemplate
-                        var itemTemplate = context.ItemTemplates.Skip(rand.Next(context.ItemTemplates.Count() - 1)).FirstOrDefault();
+                        var itemTemplate = await context.ItemTemplates.Skip(rand.Next(context.ItemTemplates.Count() - 1)).FirstOrDefaultAsync();
 
                         var listItem = new ListItem()
                         {
-                            ListId = userList.Id,
+                            UserListId = userList.Id,
                             Name = itemTemplate.Name,
                             Brand = itemTemplate.Brand,
                             Description = itemTemplate.Description,
@@ -245,24 +265,15 @@ namespace KitchenManager.Seed
                             ExpirationDate = DateTime.UtcNow.AddDays(itemTemplate.ExpirationDays).Date,
                         };
 
-                        context.ListItems.Add(listItem);
+                        var itemTags = await context.ItemTags.Where(it => it.Items.Contains(itemTemplate)).ToListAsync();
+
+                        listItem.ItemTags = itemTags;
+
+                        await context.ListItems.AddAsync(listItem);
                     }
                 }
 
-                context.SaveChanges();
-            }
-
-            if (context.ListItems.Any()) // make sure there are list items
-            {
-                foreach (var listItem in context.ListItems.Where(it => !it.ItemTags.Any()).ToList()) // if any dont have tags, add them.
-                {
-                    var takeNum = rand.Next(1, 4);
-                    var itemTags = context.ItemTags.OrderBy(g => Guid.NewGuid()).Skip(rand.Next(context.ItemTags.Count() - takeNum)).Take(takeNum).ToList();
-
-                    listItem.ItemTags = itemTags;
-                }
-
-                context.SaveChanges();
+                await context.SaveChangesAsync();
             }
         }
     }

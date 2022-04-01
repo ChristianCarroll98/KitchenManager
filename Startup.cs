@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using KitchenManager.KMAPI;
 using KitchenManager.Data;
 using KitchenManager.Seed;
+using Microsoft.AspNetCore.Identity;
 
 namespace KitchenManager
 {
@@ -26,7 +27,7 @@ namespace KitchenManager
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddIdentity<KMUser, KMRole>(options =>
+            services.AddIdentity<KMUser, IdentityRole<int>>(options =>
             {
                 options.User.RequireUniqueEmail = true;
             }).AddEntityFrameworkStores<KMDbContext>();
