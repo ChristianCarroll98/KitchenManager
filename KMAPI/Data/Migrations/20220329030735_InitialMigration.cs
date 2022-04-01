@@ -70,6 +70,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Brand = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     ExpirationDays = table.Column<int>(type: "int", nullable: false),
                     IconPath = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
@@ -250,6 +251,7 @@ namespace KitchenManager.KMAPI.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ListId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Brand = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     ExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: false),

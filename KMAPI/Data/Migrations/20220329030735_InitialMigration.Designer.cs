@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KitchenManager.KMAPI.Data.Migrations
 {
     [DbContext(typeof(KMDbContext))]
-    [Migration("20220328210255_InitialMigration")]
+    [Migration("20220329030735_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -74,6 +74,10 @@ namespace KitchenManager.KMAPI.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Brand")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(256)
@@ -226,6 +230,10 @@ namespace KitchenManager.KMAPI.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Brand")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(256)

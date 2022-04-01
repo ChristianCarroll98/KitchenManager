@@ -31,7 +31,7 @@ namespace KitchenManager.Seed
         public async Task SeedDataAsync(bool clearData)
         {
             //seed data
-
+            
             if (clearData)
             {
                 context.Database.EnsureDeleted();
@@ -169,6 +169,7 @@ namespace KitchenManager.Seed
                     var itemTemplate = new ItemTemplate()
                     {
                         Name = itemTemplateSeedModel.Name,
+                        Brand = itemTemplateSeedModel.Brand,
                         Description = itemTemplateSeedModel.Description,
                         ExpirationDays = itemTemplateSeedModel.ExpirationDays
                     };
@@ -232,15 +233,19 @@ namespace KitchenManager.Seed
                     foreach (var i in Enumerable.Range(0, rand.Next(20)))
                     {
                         //get random itemTemplate
-                        var itemTemplate = context.ItemTemplates.OrderBy(r => r.Id).Skip(rand.Next(context.ItemTemplates.Count() - 1)).FirstOrDefault();
+                        var itemTemplate = context.ItemTemplates.Skip(rand.Next(context.ItemTemplates.Count() - 1)).FirstOrDefault();
 
                         var listItem = new ListItem()
                         {
                             ListId = userList.Id,
                             Name = itemTemplate.Name,
+                            Brand = itemTemplate.Brand,
                             Description = itemTemplate.Description,
+                            Quantity = rand.Next(1, 5),
                             ExpirationDate = DateTime.UtcNow.AddDays(itemTemplate.ExpirationDays).Date,
                         };
+
+                        context.ListItems.Add(listItem);
                     }
                 }
 

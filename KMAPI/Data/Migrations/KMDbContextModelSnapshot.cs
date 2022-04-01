@@ -73,6 +73,10 @@ namespace KitchenManager.KMAPI.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("Brand")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<string>("Description")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -224,6 +228,10 @@ namespace KitchenManager.KMAPI.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Brand")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(256)

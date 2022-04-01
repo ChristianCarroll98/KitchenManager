@@ -23,15 +23,18 @@
 
   <ItemGroup>
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
+    <Compile Remove="KMUI\public\**" />
     <Content Remove="$(SpaRoot)**" />
+    <Content Remove="KMUI\public\**" />
+    <EmbeddedResource Remove="KMUI\public\**" />
     <None Remove="$(SpaRoot)**" />
+    <None Remove="KMUI\public\**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="KMUI\package-lock.json" />
     <None Include="KMUI\package.json" />
-    <None Include="KMUI\public\manifest.json" />
   </ItemGroup>
 
   <ItemGroup>

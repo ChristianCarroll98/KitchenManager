@@ -143,37 +143,6 @@ namespace KitchenManager.Data
                 b.ToTable("ListItems");
             });
 
-            /*builder.Entity<ItemTagItemTemplateJoinModel>(b =>
-            {
-                b.HasKey(jm => new { jm.ItemTagId, jm.ItemTemplateId });
-
-                b.HasOne<ItemTag>()
-                    .WithMany()
-                    .HasForeignKey(jm => jm.ItemTagId);
-
-                b.HasOne<ItemTemplate>()
-                    .WithMany()
-                    .HasForeignKey(jm => jm.ItemTemplateId);
-
-                b.ToTable("ItemTagItemTemplateJoinModels");
-            });
-
-            builder.Entity<ItemTagListItemJoinModel>(b =>
-            {
-                b.HasKey(jm => new { jm.ItemTagId, jm.ListItemId });
-
-                b.HasOne<ItemTag>()
-                    .WithMany()
-                    .HasForeignKey(jm => jm.ItemTagId);
-
-                b.HasOne<ListItem>()
-                    .WithMany()
-                    .HasForeignKey(jm => jm.ListItemId);
-                    
-
-                b.ToTable("ItemTagListItemJoinModels");
-            });*/
-
             builder.Entity<ItemTag>(b =>
             {
                 b.HasKey(it => it.Id);

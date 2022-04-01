@@ -17,6 +17,9 @@ namespace KitchenManager.KMAPI
         public string Name { get; set; }
 
         [MaxLength(256)]
+        public string Brand { get; set; }
+
+        [MaxLength(256)]
         public string Description { get; set; }
 
         public int ExpirationDays { get; set; }

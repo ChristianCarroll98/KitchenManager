@@ -11,7 +11,10 @@ namespace KitchenManager.KMAPI
         //[MaxLength(256)], throws Microsoft.EntityFrameworkCore.DbUpdateException if longer
         public string Name { get; set; }
 
-        //[MaxLength(256)], throws Microsoft.EntityFrameworkCore.DbUpdateException if longer
+        //[MaxLength(256)]
+        public string Brand { get; set; }
+
+        //[MaxLength(256)]
         public string Description { get; set; }
 
         public int Quantity { get; set; }
