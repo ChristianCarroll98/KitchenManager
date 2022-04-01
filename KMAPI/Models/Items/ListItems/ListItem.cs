@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KitchenManager.KMAPI
+namespace KitchenManager.KMAPI.Items.ListItems
 {
     public class ListItem : Item
     {

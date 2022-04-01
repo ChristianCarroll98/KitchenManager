@@ -1,15 +1,20 @@
-﻿using KitchenManager.Data;
-using KitchenManager.KMAPI;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace KitchenManager.Seed
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System;
+
+using KitchenManager.KMAPI.Items.ItemTemplates;
+using KitchenManager.KMAPI.Items.ListItems;
+using KitchenManager.KMAPI.ItemTags;
+using KitchenManager.KMAPI.KMUsers;
+using KitchenManager.KMAPI.UserLists;
+
+namespace KitchenManager.Data.Seed
 {
     public class KMSeeder
     {

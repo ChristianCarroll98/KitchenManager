@@ -1,17 +1,16 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-
-using KitchenManager.KMAPI;
-using KitchenManager.Data;
-using KitchenManager.Seed;
 using Microsoft.AspNetCore.Identity;
+
+using KitchenManager.KMAPI.KMUsers;
+using KitchenManager.Data;
+using KitchenManager.Data.Seed;
 
 namespace KitchenManager
 {

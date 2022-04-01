@@ -1,13 +1,18 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 
-using KitchenManager.KMAPI;
+using KitchenManager.KMAPI.KMUsers;
+using KitchenManager.KMAPI.UserLists;
+using KitchenManager.KMAPI.Items;
+using KitchenManager.KMAPI.Items.ListItems;
+using KitchenManager.KMAPI.Items.ItemTemplates;
+using KitchenManager.KMAPI.ItemTags;
 
 namespace KitchenManager.Data
 {
@@ -20,22 +25,14 @@ namespace KitchenManager.Data
 
         public KMDbContext(DbContextOptions<KMDbContext> options) : base(options)
         {
+            //options here
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<Item>(b =>
-            {
-                b.HasKey(i => i.Id);
-
-                b.HasDiscriminator(i => i.Discriminator);
-
-                b.ToTable("Items");
-            });
-
-            //overrides for Id column
+            //Settings for Identity classes (int for Id column and table names)
             builder.Entity<IdentityUserRole<int>>(b =>
             {
                 b.ToTable("UserRoles");
@@ -91,6 +88,7 @@ namespace KitchenManager.Data
                 b.ToTable("UserTokens");
             });
 
+            //My classes
             builder.Entity<KMUser>(b =>
             {
                 b.Property(user => user.PhoneNumber)
@@ -127,21 +125,22 @@ namespace KitchenManager.Data
                 b.Property(ul => ul.KMUserId)
                     .IsRequired();
 
-                //b.HasOne<KMUser>()
-                //    .WithMany()
-                //    .HasForeignKey(ul => ul.UserId);
-
                 b.ToTable("UserLists");
+            });
+
+            builder.Entity<Item>(b =>
+            {
+                b.HasKey(i => i.Id);
+
+                b.HasDiscriminator(i => i.Discriminator);
+
+                b.ToTable("Items");
             });
 
             builder.Entity<ListItem>(b =>
             {
                 b.Property(li => li.UserListId)
                     .IsRequired();
-
-                //b.HasOne<UserList>()
-                //    .WithMany()
-                //    .HasForeignKey(li => li.UserListId);
 
                 b.HasBaseType<Item>();
             });

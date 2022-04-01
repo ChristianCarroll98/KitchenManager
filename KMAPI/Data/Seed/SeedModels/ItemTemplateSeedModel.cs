@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KitchenManager.Seed
+namespace KitchenManager.Data.Seed
 {
     public class ItemTemplateSeedModel
     {
