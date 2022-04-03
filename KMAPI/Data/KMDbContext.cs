@@ -8,13 +8,14 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using KitchenManager.KMAPI.KMUsers;
-using KitchenManager.KMAPI.UserLists;
+using KitchenManager.KMAPI.List;
 using KitchenManager.KMAPI.Items;
 using KitchenManager.KMAPI.Items.ListItems;
 using KitchenManager.KMAPI.Items.ItemTemplates;
 using KitchenManager.KMAPI.ItemTags;
+using KitchenManager.KMAPI.Icons;
 
-namespace KitchenManager.Data
+namespace KitchenManager.KMAPI.Data
 {
     public class KMDbContext : IdentityDbContext<KMUser, IdentityRole<int>, int>
     {
@@ -22,6 +23,7 @@ namespace KitchenManager.Data
         public DbSet<ListItem> ListItems { get; set; }
         public DbSet<ItemTag> ItemTags { get; set; }
         public DbSet<ItemTemplate> ItemTemplates { get; set; }
+        public DbSet<Icon> Icons { get; set; }
 
         public KMDbContext(DbContextOptions<KMDbContext> options) : base(options)
         {
@@ -155,6 +157,11 @@ namespace KitchenManager.Data
                 b.HasKey(it => it.Id);
 
                 b.ToTable("ItemTags");
+            });
+
+            builder.Entity<Icon>(b =>
+            {
+                b.HasKey(i => i.Id);
             });
         }
     }

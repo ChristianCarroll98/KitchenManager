@@ -12,9 +12,9 @@ using KitchenManager.KMAPI.Items.ItemTemplates;
 using KitchenManager.KMAPI.Items.ListItems;
 using KitchenManager.KMAPI.ItemTags;
 using KitchenManager.KMAPI.KMUsers;
-using KitchenManager.KMAPI.UserLists;
+using KitchenManager.KMAPI.List;
 
-namespace KitchenManager.Data.Seed
+namespace KitchenManager.KMAPI.Data.Seed
 {
     public class KMSeeder
     {

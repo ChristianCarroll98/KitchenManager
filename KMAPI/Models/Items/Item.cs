@@ -1,4 +1,5 @@
-﻿using KitchenManager.KMAPI.ItemTags;
+﻿using KitchenManager.KMAPI.Icons;
+using KitchenManager.KMAPI.ItemTags;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -18,18 +19,16 @@ namespace KitchenManager.KMAPI.Items
         public string Name { get; set; }
 
         [MaxLength(256)]
-        public string Brand { get; set; }
+        public string Brand { get; set; } = string.Empty;
 
         [MaxLength(256)]
-        public string Description { get; set; }
-
-        [MaxLength(256)]
-        [Column(TypeName = "varchar(256)")]
-        public string IconPath { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         [MaxLength(256)]
         [Column(TypeName = "varchar(256)")]
         public string Discriminator { get; set; }
+
+        public Icon Icon { get; set; }
 
         public List<ItemTag> ItemTags { get; set; }
     }

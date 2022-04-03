@@ -9,8 +9,9 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
 
 using KitchenManager.KMAPI.KMUsers;
-using KitchenManager.Data;
-using KitchenManager.Data.Seed;
+using KitchenManager.KMAPI.Data;
+using KitchenManager.KMAPI.Data.Seed;
+using KitchenManager.KMAPI.Items.ItemTemplates.Repo;
 
 namespace KitchenManager
 {
@@ -38,7 +39,12 @@ namespace KitchenManager
 
             services.AddTransient<KMSeeder>();
 
-            services.AddControllersWithViews();
+            services.AddScoped<IItemTemplateRepository, ItemTemplateRepository>();
+
+            services.AddControllersWithViews()
+                .AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            );
 
             services.AddSwaggerGen(c =>
             {

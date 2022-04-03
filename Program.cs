@@ -1,4 +1,4 @@
-using KitchenManager.Data.Seed;
+using KitchenManager.KMAPI.Data.Seed;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;

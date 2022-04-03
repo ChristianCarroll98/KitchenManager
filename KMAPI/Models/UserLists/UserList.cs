@@ -1,4 +1,5 @@
-﻿using KitchenManager.KMAPI.Items.ListItems;
+﻿using KitchenManager.KMAPI.Icons;
+using KitchenManager.KMAPI.Items.ListItems;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -6,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KitchenManager.KMAPI.UserLists
+namespace KitchenManager.KMAPI.List
 {
     public class UserList
     {
@@ -21,11 +22,9 @@ namespace KitchenManager.KMAPI.UserLists
         public string Name { get; set; }
 
         [MaxLength(256)]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
-        [MaxLength(256)]
-        [Column(TypeName = "varchar(256)")]
-        public string IconPath { get; set; }
+        public Icon Icon { get; set; }
 
         public List<ListItem> ListItems { get; set; }
     }

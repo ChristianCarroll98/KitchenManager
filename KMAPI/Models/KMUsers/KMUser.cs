@@ -1,10 +1,6 @@
-﻿using KitchenManager.KMAPI.UserLists;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+using KitchenManager.KMAPI.List;
 
 namespace KitchenManager.KMAPI.KMUsers
 {
