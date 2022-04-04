@@ -2,6 +2,7 @@
 using KitchenManager.KMAPI.Items.ItemTemplates.DTO;
 using KitchenManager.KMAPI.ItemTags;
 using KitchenManager.KMAPI.Models.ItemTags.DTO;
+using KitchenManager.KMAPI.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,16 +14,18 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
 {
     public interface IItemTemplateRepository
     {
-        Task<ItemTemplateResponse> RetrieveById(int id);
-        Task<ItemTemplateResponse> RetrieveByNameAndBrand(string name, string brand);
-        Task<ItemTemplateListResponse> RetrieveByStatus(ItemStatus status);
-        Task<ItemTemplateListResponse> RetrieveAll();
+        Task<KMResponse<ItemTemplateDTO>> RetrieveById(int id);
+        Task<KMResponse<List<ItemTemplateDTO>>> RetrieveByName(string name);
+        Task<KMResponse<List<ItemTemplateDTO>>> RetrieveByBrand(string brand);
+        Task<KMResponse<ItemTemplateDTO>> RetrieveByNameAndBrand(string name, string brand);
+        Task<KMResponse<List<ItemTemplateDTO>>> RetrieveByStatus(ItemStatus status);
+        Task<KMResponse<List<ItemTemplateDTO>>> RetrieveAll();
 
-        Task<ItemTemplateResponse> Create(ItemTemplateDTO model);
-        Task<ItemTemplateResponse> Update(ItemTemplateDTO model, string originalName, string originalBrand);
-        Task<ItemTemplateResponse> UpdateStatus(ItemStatus status, string name, string brand);
-        Task<ItemTemplateResponse> SetDeleteStatus(string name, string brand);
-        Task<ItemTemplateResponse> Delete(string name, string brand);
+        Task<KMResponse<ItemTemplateDTO>> Create(ItemTemplateDTO model);
+        Task<KMResponse<ItemTemplateDTO>> Update(ItemTemplateDTO model, string originalName, string originalBrand);
+        Task<KMResponse<ItemTemplateDTO>> UpdateStatus(ItemStatus status, string name, string brand);
+        Task<KMResponse<ItemTemplateDTO>> SetDeleteStatus(string name, string brand);
+        Task<KMResponse<ItemTemplateDTO>> Delete(string name, string brand);
     }   
 
     public class ItemTemplateRepository : IItemTemplateRepository
@@ -36,9 +39,9 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
             ITLogger = iTLogger;
         }
 
-        public async Task<ItemTemplateResponse> RetrieveById(int id)
+        public async Task<KMResponse<ItemTemplateDTO>> RetrieveById(int id)
         {
-            ItemTemplateResponse response = new ItemTemplateResponse();
+            KMResponse<ItemTemplateDTO> response = new();
 
             try
             {
@@ -57,7 +60,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
                     return response;
                 }
 
-                response.ITResponseDTO.setValuesFromItemTemplate(itemTemplate);
+                response.Data = new ItemTemplateDTO(itemTemplate);
             }
 
             catch (Exception ex)
@@ -72,9 +75,77 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
             return response;
         }
 
-        public async Task<ItemTemplateResponse> RetrieveByNameAndBrand(string name, string brand)
+        public async Task<KMResponse<List<ItemTemplateDTO>>> RetrieveByName(string name)
         {
-            ItemTemplateResponse response = new ItemTemplateResponse();
+            KMResponse<List<ItemTemplateDTO>> response = new();
+
+            try
+            {
+                var itemTemplates = await Context
+                        .ItemTemplates
+                        .Include(x => x.ItemTags)
+                        .Where(it => it.Name == name)
+                        .ToListAsync();
+
+                if (!itemTemplates.Any())
+                {
+                    response.Success = false;
+                    response.Message = $"Could not find any Item Templates with Name: {name}.";
+                    ITLogger.LogError($"Could not find any Item Templates with Name: {name}.");
+                    return response;
+                }
+
+                response.Data = itemTemplates.Select(it => new ItemTemplateDTO(it)).ToList();
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occured while attempting to find Item Templates with Name: {name}.";
+                ITLogger.LogError($"An error occured while attempting to find Item Templates with Name: {name}. Message: {ex.Message}");
+                return response;
+            }
+
+            response.Message = $"Successfully retrieved Item Templates with Name: {name}.";
+            return response;
+        }
+
+        public async Task<KMResponse<List<ItemTemplateDTO>>> RetrieveByBrand(string brand)
+        {
+            KMResponse<List<ItemTemplateDTO>> response = new();
+
+            try
+            {
+                var itemTemplates = await Context
+                        .ItemTemplates
+                        .Include(x => x.ItemTags)
+                        .Where(it => it.Brand == brand)
+                        .ToListAsync();
+
+                if (!itemTemplates.Any())
+                {
+                    response.Success = false;
+                    response.Message = $"Could not find any Item Templates with Brand: {brand}.";
+                    ITLogger.LogError($"Could not find any Item Templates with Brand: {brand}.");
+                    return response;
+                }
+
+                response.Data = itemTemplates.Select(it => new ItemTemplateDTO(it)).ToList();
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occured while attempting to find Item Templates with Brand: {brand}.";
+                ITLogger.LogError($"An error occured while attempting to find Item Templates with Brand: {brand}. Message: {ex.Message}");
+                return response;
+            }
+
+            response.Message = $"Successfully retrieved Item Templates with Brand: {brand}.";
+            return response;
+        }
+
+        public async Task<KMResponse<ItemTemplateDTO>> RetrieveByNameAndBrand(string name, string brand)
+        {
+            KMResponse<ItemTemplateDTO> response = new();
 
             try
             {
@@ -94,7 +165,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
                     return response;
                 }
 
-                response.ITResponseDTO.setValuesFromItemTemplate(itemTemplate);
+                response.Data = new ItemTemplateDTO(itemTemplate);
             }
             catch (Exception ex)
             {
@@ -108,9 +179,9 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
             return response;
         }
 
-        public async Task<ItemTemplateListResponse> RetrieveByStatus(ItemStatus status)
+        public async Task<KMResponse<List<ItemTemplateDTO>>> RetrieveByStatus(ItemStatus status)
         {
-            ItemTemplateListResponse response = new ItemTemplateListResponse();
+            KMResponse<List<ItemTemplateDTO>> response = new();
 
             try
             {
@@ -128,7 +199,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
                     return response;
                 }
 
-                response.SetITResponseDTOsFromITList(itemTemplates);
+                response.Data = itemTemplates.Select(it => new ItemTemplateDTO(it)).ToList();
             }
             catch (Exception ex)
             {
@@ -142,9 +213,9 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
             return response;
         }
 
-        public async Task<ItemTemplateListResponse> RetrieveAll()
+        public async Task<KMResponse<List<ItemTemplateDTO>>> RetrieveAll()
         {
-            ItemTemplateListResponse response = new ItemTemplateListResponse();
+            KMResponse<List<ItemTemplateDTO>> response = new();
 
             try
             {
@@ -162,7 +233,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
                     return response;
                 }
 
-                response.SetITResponseDTOsFromITList(itemTemplates);
+                response.Data = itemTemplates.Select(it => new ItemTemplateDTO(it)).ToList();
             }
             catch (Exception ex)
             {
@@ -176,20 +247,20 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
             return response;
         }
 
-        public async Task<ItemTemplateResponse> Create(ItemTemplateDTO model)
+        public async Task<KMResponse<ItemTemplateDTO>> Create(ItemTemplateDTO model)
         {
-            ItemTemplateResponse response = new();
+            KMResponse<ItemTemplateDTO> response = new();
 
             try
             {
-                ItemTemplateResponse checkPreExisting = await RetrieveByNameAndBrand(model.Name, model.Brand);
+                KMResponse<ItemTemplateDTO> checkPreExisting = await RetrieveByNameAndBrand(model.Name, model.Brand);
 
                 if(checkPreExisting.Success)
                 {
                     response.Success = false;
-                    response.Message = $"An Item Template already exists with Name: {checkPreExisting.ITResponseDTO.Name} and Brand: {checkPreExisting.ITResponseDTO.Brand}.";
-                    response.ITResponseDTO = checkPreExisting.ITResponseDTO;
-                    ITLogger.LogError($"An Item Template already exists with Name: {checkPreExisting.ITResponseDTO.Name} and Brand: {checkPreExisting.ITResponseDTO.Brand}.");
+                    response.Message = $"An Item Template already exists with Name: {checkPreExisting.Data.Name} and Brand: {checkPreExisting.Data.Brand}.";
+                    response.Data = checkPreExisting.Data;
+                    ITLogger.LogError($"An Item Template already exists with Name: {checkPreExisting.Data.Name} and Brand: {checkPreExisting.Data.Brand}.");
                     return response;
                 }
 
@@ -220,7 +291,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
                 await Context.ItemTemplates.AddAsync(newItemTemplate);
                 await Context.SaveChangesAsync();
 
-                ItemTemplateResponse checkAdded = await RetrieveByNameAndBrand(model.Name, model.Brand);
+                KMResponse<ItemTemplateDTO> checkAdded = await RetrieveByNameAndBrand(model.Name, model.Brand);
 
                 if (!checkAdded.Success)
                 {
@@ -230,7 +301,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
                     return response;
                 }
                 
-                response.ITResponseDTO = checkAdded.ITResponseDTO;
+                response.Data = checkAdded.Data;
             }
             catch (Exception ex)
             {
@@ -240,17 +311,17 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
                 return response;
             }
 
-            response.Message = $"Successfully created new Item Template with Name: {response.ITResponseDTO.Name} and Brand: {response.ITResponseDTO.Brand}.";
+            response.Message = $"Successfully created new Item Template with Name: {response.Data.Name} and Brand: {response.Data.Brand}.";
             return response;
         }
 
-        public async Task<ItemTemplateResponse> Update(ItemTemplateDTO model, string originalName, string originalBrand)
+        public async Task<KMResponse<ItemTemplateDTO>> Update(ItemTemplateDTO model, string originalName, string originalBrand)
         {
-            ItemTemplateResponse response = new();
+            KMResponse<ItemTemplateDTO> response = new();
 
             try
             {
-                ItemTemplateResponse verifyPreExisting = await RetrieveByNameAndBrand(originalName, originalBrand);
+                KMResponse<ItemTemplateDTO> verifyPreExisting = await RetrieveByNameAndBrand(originalName, originalBrand);
 
                 if (!verifyPreExisting.Success)
                 {
@@ -294,7 +365,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
                 Context.ItemTemplates.Update(updatedItemTemplate);
                 await Context.SaveChangesAsync();
 
-                response.ITResponseDTO.setValuesFromItemTemplate(updatedItemTemplate);
+                response.Data = new ItemTemplateDTO(updatedItemTemplate);
             }
             catch (Exception ex)
             {
@@ -308,9 +379,9 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
             return response;
         }
 
-        public async Task<ItemTemplateResponse> UpdateStatus(ItemStatus status, string name, string brand)
+        public async Task<KMResponse<ItemTemplateDTO>> UpdateStatus(ItemStatus status, string name, string brand)
         {
-            ItemTemplateResponse response = new();
+            KMResponse<ItemTemplateDTO> response = new();
 
             if (status == ItemStatus.deleted)
             {
@@ -322,9 +393,9 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
 
             try
             {
-                ItemTemplateResponse verifyPreExisting = await RetrieveByNameAndBrand(name, brand);
+                KMResponse<ItemTemplateDTO> verifyPreExisting = await RetrieveByNameAndBrand(name, brand);
 
-                if (verifyPreExisting.ITResponseDTO == null)
+                if (verifyPreExisting.Data == null)
                 {
                     response.Success = false;
                     response.Message = $"Failed to find Item Template with Name: {name} and Brand: {brand} to update status.";
@@ -345,7 +416,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
                     response.Success = false;
                     response.Message = $"Status of Item Template with Name: {name} and Brand: {brand} is already set to {status.ToString()}";
                     ITLogger.LogError($"Status of Item Template with Name: {name} and Brand: {brand} is already set to {status.ToString()}");
-                    response.ITResponseDTO.setValuesFromItemTemplate(updateStatusItemTemplate);
+                    response.Data = new ItemTemplateDTO(updateStatusItemTemplate);
                     return response;
                 }
 
@@ -354,7 +425,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
                 Context.ItemTemplates.Update(updateStatusItemTemplate);
                 await Context.SaveChangesAsync();
 
-                response.ITResponseDTO.setValuesFromItemTemplate(updateStatusItemTemplate);
+                response.Data = new ItemTemplateDTO(updateStatusItemTemplate);
             }
             catch (Exception ex)
             {
@@ -368,13 +439,13 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
             return response;
         }
 
-        public async Task<ItemTemplateResponse> SetDeleteStatus(string name, string brand)
+        public async Task<KMResponse<ItemTemplateDTO>> SetDeleteStatus(string name, string brand)
         {
-            ItemTemplateResponse response = new();
+            KMResponse<ItemTemplateDTO> response = new();
 
             try
             {
-                ItemTemplateResponse verifyPreExisting = await RetrieveByNameAndBrand(name, brand);
+                KMResponse<ItemTemplateDTO> verifyPreExisting = await RetrieveByNameAndBrand(name, brand);
 
                 if (!verifyPreExisting.Success)
                 {
@@ -397,7 +468,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
                 Context.ItemTemplates.Update(deletedStatusItemTemplate);
                 await Context.SaveChangesAsync();
 
-                response.ITResponseDTO.setValuesFromItemTemplate(deletedStatusItemTemplate);
+                response.Data = new ItemTemplateDTO(deletedStatusItemTemplate);
             }
             catch (Exception ex)
             {
@@ -411,15 +482,15 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
             return response;
         }
 
-        public async Task<ItemTemplateResponse> Delete(string name, string brand)
+        public async Task<KMResponse<ItemTemplateDTO>> Delete(string name, string brand)
         {
-            ItemTemplateResponse response = new();
+            KMResponse<ItemTemplateDTO> response = new();
 
             try
             {
-                ItemTemplateResponse verifyPreExisting = await RetrieveByNameAndBrand(name, brand);
+                KMResponse<ItemTemplateDTO> verifyPreExisting = await RetrieveByNameAndBrand(name, brand);
 
-                if (verifyPreExisting.ITResponseDTO == null)
+                if (verifyPreExisting.Data == null)
                 {
                     response.Success = false;
                     response.Message = $"Failed to find Item Template with Name: {name} and Brand: {brand} to permanently delete.";
@@ -446,7 +517,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
                 Context.ItemTemplates.Remove(deletedItemTemplate);
                 await Context.SaveChangesAsync();
 
-                ItemTemplateResponse verifyDeleted = await RetrieveById(deletedItemTemplate.Id);
+                KMResponse<ItemTemplateDTO> verifyDeleted = await RetrieveById(deletedItemTemplate.Id);
 
                 if(verifyDeleted.Success){
                     response.Success = false;
@@ -455,7 +526,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.Repo
                     return response;
                 }
 
-                response.ITResponseDTO.setValuesFromItemTemplate(deletedItemTemplate);
+                response.Data = new ItemTemplateDTO(deletedItemTemplate);
             }
             catch (Exception ex)
             {

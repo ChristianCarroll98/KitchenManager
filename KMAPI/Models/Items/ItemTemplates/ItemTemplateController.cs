@@ -1,5 +1,6 @@
 ﻿using KitchenManager.KMAPI.Items.ItemTemplates.DTO;
 using KitchenManager.KMAPI.Items.ItemTemplates.Repo;
+using KitchenManager.KMAPI.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -24,7 +25,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<ItemTemplateResponse> RetrieveById(int id)
+        public ActionResult<KMResponse<ItemTemplateDTO>> RetrieveById(int id)
         {
             try
             {
@@ -37,11 +38,45 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates
             }
         }
 
+        [Route("RetrieveByName")]
+        [HttpGet()]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public ActionResult<KMResponse<ItemTemplateDTO>> RetrieveByName(string name)
+        {
+            try
+            {
+                return Ok(ITRepo.RetrieveByName(name).Result);
+            }
+            catch (Exception ex)
+            {
+                ITLogger.LogError($"Failed to retrieve Item Templates with Name: {name}. Message: {ex.Message}");
+                return BadRequest($"Failed to retrieve Item Templates with name: {name}.");
+            }
+        }
+
+        [Route("RetrieveByBrand")]
+        [HttpGet()]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public ActionResult<KMResponse<ItemTemplateDTO>> RetrieveByBrand(string brand)
+        {
+            try
+            {
+                return Ok(ITRepo.RetrieveByBrand(brand).Result);
+            }
+            catch (Exception ex)
+            {
+                ITLogger.LogError($"Failed to retrieve Item Templates with Brand: {brand}. Message: {ex.Message}");
+                return BadRequest($"Failed to retrieve Item Templates with brand: {brand}.");
+            }
+        }
+
         [Route("RetrieveByNameAndBrand")]
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<ItemTemplateResponse> RetrieveByNameAndBrand(string name, string brand)
+        public ActionResult<KMResponse<ItemTemplateDTO>> RetrieveByNameAndBrand(string name, string brand)
         {
             try
             {
@@ -58,7 +93,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<ItemTemplateListResponse> RetrieveByStatus(ItemStatus status)
+        public ActionResult<KMResponse<ItemTemplateDTO>> RetrieveByStatus(ItemStatus status)
         {
             try
             {
@@ -66,8 +101,8 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates
             }
             catch (Exception ex)
             {
-                ITLogger.LogError($"Failed to retrieve Item Template with status: {status}. Message: {ex.Message}");
-                return BadRequest($"Failed to retrieve Item Template with the specified status.");
+                ITLogger.LogError($"Failed to retrieve Item Templates with status: {status}. Message: {ex.Message}");
+                return BadRequest($"Failed to retrieve Item Templates with the specified status.");
             }
         }
 
@@ -75,7 +110,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<ItemTemplateListResponse> RetrieveAll()
+        public ActionResult<KMResponse<ItemTemplateDTO>> RetrieveAll()
         {
             try
             {

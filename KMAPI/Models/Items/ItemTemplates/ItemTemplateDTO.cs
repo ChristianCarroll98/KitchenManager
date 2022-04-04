@@ -19,11 +19,6 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.DTO
         public ItemTemplateDTO(){}
         public ItemTemplateDTO(ItemTemplate itemTemplate)
         {
-            setValuesFromItemTemplate(itemTemplate);
-        }
-
-        public void setValuesFromItemTemplate(ItemTemplate itemTemplate)
-        {
             Name = itemTemplate.Name;
             Brand = itemTemplate.Brand;
             Description = itemTemplate.Description;
