@@ -9,6 +9,13 @@ using System.Threading.Tasks;
 
 namespace KitchenManager.KMAPI.Items
 {
+    public enum ItemStatus
+    {
+        active,
+        inactive,
+        deleted
+    }
+
     public abstract class Item
     {
         [Required]
@@ -19,7 +26,7 @@ namespace KitchenManager.KMAPI.Items
         public string Name { get; set; }
 
         [MaxLength(256)]
-        public string Brand { get; set; } = string.Empty;
+        public string Brand { get; set; } = "None";
 
         [MaxLength(256)]
         public string Description { get; set; } = string.Empty;
@@ -30,6 +37,8 @@ namespace KitchenManager.KMAPI.Items
 
         public Icon Icon { get; set; }
 
-        public List<ItemTag> ItemTags { get; set; }
+        public List<ItemTag> ItemTags { get; set; } = new List<ItemTag>();
+
+        public ItemStatus Status { get; set; } = ItemStatus.active;
     }
 }
