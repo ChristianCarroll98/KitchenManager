@@ -6,6 +6,7 @@ namespace KitchenManager.KMAPI.Models.ItemTags.DTO
     {
         public string Name { get; set; } = string.Empty;
 
+        public ItemTagDTO(){}
         public ItemTagDTO(ItemTag itemTag)
         {
             Name = itemTag.Name;

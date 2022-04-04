@@ -94,7 +94,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates
         {
             try
             {
-                return Ok(ITRepo.Create(model));
+                return Ok(ITRepo.Create(model).Result);
             }
             catch (Exception ex)
             {
@@ -109,12 +109,27 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates
         {
             try
             {
-                return Ok(ITRepo.Update(model, originalName, originalBrand));
+                return Ok(ITRepo.Update(model, originalName, originalBrand).Result);
             }
             catch (Exception ex)
             {
                 ITLogger.LogError($"Failed to update Item Template with original Name: {originalName} and original Brand: {originalBrand}. Message: {ex}");
                 return BadRequest($"Failed to update the specified Item Template.");
+            }
+        }
+
+        [Route("UpdateStatus")]
+        [HttpPost]
+        public IActionResult SetDeleteStatus(ItemStatus status, string name, string brand)
+        {
+            try
+            {
+                return Ok(ITRepo.UpdateStatus(status, name, brand).Result);
+            }
+            catch (Exception ex)
+            {
+                ITLogger.LogError($"Failed to update status for Item Template with Name: {name} and Brand: {brand}. Message: {ex}");
+                return BadRequest($"Failed to update status for Item Template with Name: {name} and Brand: {brand}");
             }
         }
 
@@ -124,12 +139,12 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates
         {
             try
             {
-                return Ok(ITRepo.SetDeleteStatus(name, brand));
+                return Ok(ITRepo.SetDeleteStatus(name, brand).Result);
             }
             catch (Exception ex)
             {
                 ITLogger.LogError($"Failed to set delete status for Item Template with Name: {name} and Brand: {brand}. Message: {ex}");
-                return BadRequest($"Failed to delete Item Template with the specified Id");
+                return BadRequest($"Failed to delete Item Template with Name: {name} and Brand: {brand}");
             }
         }
 
@@ -139,7 +154,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates
         {
             try
             {
-                return Ok(ITRepo.Delete(name, brand));
+                return Ok(ITRepo.Delete(name, brand).Result);
             }
             catch (Exception ex)
             {

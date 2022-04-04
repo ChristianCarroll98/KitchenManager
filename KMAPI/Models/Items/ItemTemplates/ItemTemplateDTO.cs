@@ -16,7 +16,7 @@ namespace KitchenManager.KMAPI.Items.ItemTemplates.DTO
         public Icon Icon { get; set; } = new Icon();
         public List<ItemTagDTO> ItemTagDTOs { get; set; } = new List<ItemTagDTO>();
 
-        public ItemTemplateDTO() { }
+        public ItemTemplateDTO(){}
         public ItemTemplateDTO(ItemTemplate itemTemplate)
         {
             setValuesFromItemTemplate(itemTemplate);

@@ -12,6 +12,7 @@ using KitchenManager.KMAPI.KMUsers;
 using KitchenManager.KMAPI.Data;
 using KitchenManager.KMAPI.Data.Seed;
 using KitchenManager.KMAPI.Items.ItemTemplates.Repo;
+using System.Text.Json.Serialization;
 
 namespace KitchenManager
 {
@@ -43,13 +44,17 @@ namespace KitchenManager
 
             services.AddControllersWithViews()
                 .AddNewtonsoftJson(options =>
-                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-            );
+                {
+                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                    options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+                });
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc(name: "v1", new OpenApiInfo { Title = "KitchenManager API", Version = "v1" });
             });
+
+            services.AddSwaggerGenNewtonsoftSupport();
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
