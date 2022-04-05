@@ -8,11 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
 
-using KitchenManager.KMAPI.KMUsers;
-using KitchenManager.KMAPI.Data;
-using KitchenManager.KMAPI.Data.Seed;
-using KitchenManager.KMAPI.Items.ItemTemplates.Repo;
-using System.Text.Json.Serialization;
+using KitchenManager.API.UsersNS;
+using KitchenManager.API.Data;
+using KitchenManager.API.Data.Seed;
+using KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo;
+using KitchenManager.API.ItemsNS.ListItemsNS.Repo;
+using KitchenManager.API.ItemTagsNS.Repo;
 
 namespace KitchenManager
 {
@@ -28,7 +29,7 @@ namespace KitchenManager
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddIdentity<KMUser, IdentityRole<int>>(options =>
+            services.AddIdentity<User, IdentityRole<int>>(options =>
             {
                 options.User.RequireUniqueEmail = true;
             }).AddEntityFrameworkStores<KMDbContext>();
@@ -41,6 +42,8 @@ namespace KitchenManager
             services.AddTransient<KMSeeder>();
 
             services.AddScoped<IItemTemplateRepository, ItemTemplateRepository>();
+            services.AddScoped<IListItemRepository, ListItemRepository>();
+            services.AddScoped<IItemTagRepository, ItemTagRepository>();
 
             services.AddControllersWithViews()
                 .AddNewtonsoftJson(options =>
