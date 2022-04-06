@@ -11,12 +11,12 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS
         public int Quantity { get; set; } = 1;
 
         public DateTime ExpirationDate { get; set; }
-        
+
+        public UserList UserList { get; set; } = new();
+
         public ListItem()
         {
             Discriminator = "ListItem";
-        }
-
-        public UserList UserList { get; set; } = new();
+        } 
     }
 }

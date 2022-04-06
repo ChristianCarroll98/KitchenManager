@@ -1,4 +1,5 @@
 ﻿using KitchenManager.API.Data;
+using KitchenManager.API.IconsNS;
 using KitchenManager.API.ItemsNS.ItemTemplatesNS.DTO;
 using KitchenManager.API.ItemTagsNS;
 using KitchenManager.API.SharedNS.ResponseNS;
@@ -23,10 +24,10 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
         Task<Response<List<ItemTemplateDTO>>> RetrieveAll();
 
         Task<Response<ItemTemplateDTO>> Create(ItemTemplateDTO model);
-        Task<Response<ItemTemplateDTO>> Update(ItemTemplateDTO model, string originalName, string originalBrand);
-        Task<Response<ItemTemplateDTO>> UpdateStatus(Status status, string name, string brand);
-        Task<Response<ItemTemplateDTO>> SetDeletedStatus(string name, string brand);
-        Task<Response<ItemTemplateDTO>> Delete(string name, string brand);
+        Task<Response<ItemTemplateDTO>> Update(ItemTemplateDTO model, string originalName, string originalBrand); //admin only
+        Task<Response<ItemTemplateDTO>> UpdateStatus(Status status, string name, string brand); //admin only
+        Task<Response<ItemTemplateDTO>> SetDeletedStatus(string name, string brand); //admin only
+        Task<Response<ItemTemplateDTO>> Delete(string name, string brand); //admin only
     }   
 
     public class ItemTemplateRepository : IItemTemplateRepository
@@ -321,7 +322,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                     Brand = model.Brand,
                     Description = model.Description,
                     ExpirationDays = model.ExpirationDays,
-                    Icon = model.Icon
+                    Icon = new Icon() { Name = model.IconDTO.Name, Path = model.IconDTO.Path }
                 };
 
                 //add pre-existing item tags from model
@@ -398,10 +399,16 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                         .FirstOrDefaultAsync();
 
                 updatedItemTemplate.Name = model.Name;
+
                 updatedItemTemplate.Brand = model.Brand;
+
                 updatedItemTemplate.Description = model.Description;
+
                 updatedItemTemplate.ExpirationDays = model.ExpirationDays;
-                updatedItemTemplate.Icon = model.Icon;
+
+                //sets icon to the pre-existing icon from model in DB if it exists otherwise creates a new one.
+                updatedItemTemplate.Icon = await Context.Icons.Where(i => i.Name == model.IconDTO.Name).FirstOrDefaultAsync() ?? 
+                        new Icon() { Name = model.IconDTO.Name, Path = model.IconDTO.Path };
 
                 updatedItemTemplate.ItemTags.Clear();
 

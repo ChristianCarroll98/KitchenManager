@@ -1,5 +1,6 @@
 ﻿using KitchenManager.API.ItemsNS.ListItemsNS.DTO;
 using KitchenManager.API.SharedNS.ResponseNS;
+using KitchenManager.API.SharedNS.StatusNS;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -15,19 +16,19 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             an admin can then at some point edit and approve it to go in the official template list
             or they can reject it and delete it.
          */
-         /*
-        Task<Response<ListItemDTO>> RetrieveById(int id);
+        /// TODO: determine which methods i will need in this repo
+        /*Task<Response<ListItemDTO>> RetrieveById(int id);
         Task<Response<List<ListItemDTO>>> RetrieveByName(string name);
         Task<Response<List<ListItemDTO>>> RetrieveByBrand(string brand);
         Task<Response<ListItemDTO>> RetrieveByNameAndBrand(string name, string brand);
-        Task<Response<List<ListItemDTO>>> RetrieveByStatus(ItemStatus status);
+        Task<Response<List<ListItemDTO>>> RetrieveByStatus(Status status);
         Task<Response<List<ListItemDTO>>> RetrieveAll();
 
         Task<Response<ListItemDTO>> Create(ListItemDTO model);
         Task<Response<ListItemDTO>> Update(ListItemDTO model, string originalName, string originalBrand);
-        Task<Response<ListItemDTO>> UpdateStatus(ItemStatus status, string name, string brand);
+        Task<Response<ListItemDTO>> UpdateStatus(Status status, string name, string brand);
         Task<Response<ListItemDTO>> SetDeleteStatus(string name, string brand);
-        Task<Response<ListItemDTO>> Delete(string name, string brand); */
+        Task<Response<ListItemDTO>> Delete(string name, string brand);*/
     }
 
     public class ListItemRepository : IListItemRepository

@@ -1,6 +1,6 @@
-﻿using KitchenManager.API.IconsNS;
+﻿using KitchenManager.API.IconsNS.DTO;
 using KitchenManager.API.ItemTagsNS.DTO;
-using KitchenManager.API.UserListsNS;
+using KitchenManager.API.UserListsNS.DTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,9 +14,9 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.DTO
         public string Description { get; set; } = string.Empty;
         public int Quantity { get; set; } = 1;
         public DateTime ExpirationDate { get; set; } = default;
-        public Icon Icon { get; set; } = new();
+        public IconDTO IconDTO { get; set; } = new();
 
-        public UserList UserList { get; set; } = new();
+        public UserListDTO UserListDTO { get; set; } = new();
         public List<ItemTagDTO> ItemTagDTOs { get; set; } = new List<ItemTagDTO>();
 
         public ListItemDTO() { }
@@ -25,10 +25,10 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.DTO
             Name = listItem.Name;
             Brand = listItem.Brand;
             Description = listItem.Description;
-            UserList = listItem.UserList;
+            UserListDTO = new UserListDTO(listItem.UserList, false);
             Quantity = listItem.Quantity;
             ExpirationDate = listItem.ExpirationDate;
-            Icon = listItem.Icon;
+            IconDTO = new IconDTO(listItem.Icon);
             ItemTagDTOs = listItem.ItemTags.Select(it => new ItemTagDTO(it)).ToList();
         }
     }

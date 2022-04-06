@@ -20,11 +20,8 @@ namespace KitchenManager.API.ItemTagsNS.Repo
         Task<Response<List<ItemTagDTO>>> RetrieveByStatus(Status status);
         Task<Response<List<ItemTagDTO>>> RetrieveAll();
 
-        //only Admins will ever use this method. (will be authorized to admins only)
-        Task<Response<ItemTagDTO>> Create(string name);
-        //item tags which were user created are automatically deleted when
-        //removed from the last item they were assigned to.
-        Task<Response<ItemTagDTO>> Delete(string name);
+        Task<Response<ItemTagDTO>> Create(string name); //admin only
+        Task<Response<ItemTagDTO>> Delete(string name); //admin only
     }
 
     public class ItemTagRepository : IItemTagRepository
