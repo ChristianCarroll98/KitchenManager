@@ -180,7 +180,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             return response;
         }
 
-        public async Task<Response<List<ItemTemplateDTO>>> RetrieveByItemTags(List<string> itemTags)
+        public async Task<Response<List<ItemTemplateDTO>>> RetrieveByItemTags(List<string> tagNames)
         {
             Response<List<ItemTemplateDTO>> response = new();
 
@@ -188,15 +188,15 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             {
                 List<ItemTemplate> itemTemplates;
 
-                if (itemTags.Any())
+                if (tagNames.Any())
                 {
                     itemTemplates = await Context
                             .ItemTemplates
                             .Include(x => x.ItemTags)
                             .Where(itmp => itmp.ItemTags
                                     .Select(it => it.Name)
-                                    .Any(itg => itemTags
-                                            .Contains(itg)))
+                                    .Any(itn => tagNames
+                                            .Contains(itn)))
                             .ToListAsync();
                 }
                 else
@@ -211,8 +211,8 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 if (!itemTemplates.Any())
                 {
                     response.Success = false;
-                    response.Message = $"Could not find any Item Templates with tags: {string.Join(", ", itemTags)}.";
-                    ITLogger.LogError($"Could not find any Item Templates with tags: {string.Join(", ", itemTags)}");
+                    response.Message = $"Could not find any Item Templates with tags: {string.Join(", ", tagNames)}.";
+                    ITLogger.LogError($"Could not find any Item Templates with tags: {string.Join(", ", tagNames)}");
                     return response;
                 }
 
@@ -221,12 +221,12 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             catch (Exception ex)
             {
                 response.Success = false;
-                response.Message = $"An error occured while attempting to find Item Templates with tags: {string.Join(", ", itemTags)}.";
-                ITLogger.LogError($"An error occured while attempting to find Item Templates with tags: {string.Join(", ", itemTags)}. Message: {ex.Message}");
+                response.Message = $"An error occured while attempting to find Item Templates with tags: {string.Join(", ", tagNames)}.";
+                ITLogger.LogError($"An error occured while attempting to find Item Templates with tags: {string.Join(", ", tagNames)}. Message: {ex.Message}");
                 return response;
             }
 
-            response.Message = $"Successfully retrieved Item Templates with the specified tags: {string.Join(", ", itemTags)}.";
+            response.Message = $"Successfully retrieved Item Templates with the specified tags: {string.Join(", ", tagNames)}.";
             return response;
         }
 
@@ -309,9 +309,9 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 if(checkPreExisting.Success)
                 {
                     response.Success = false;
-                    response.Message = $"An Item Template already exists with Name: {checkPreExisting.Data.Name} and Brand: {checkPreExisting.Data.Brand}.";
+                    response.Message = $"An Item Template already exists with Name: {model.Name} and Brand: {model.Brand}. Message: {checkPreExisting.Message}";
                     response.Data = checkPreExisting.Data;
-                    ITLogger.LogError($"An Item Template already exists with Name: {checkPreExisting.Data.Name} and Brand: {checkPreExisting.Data.Brand}.");
+                    ITLogger.LogError($"An Item Template already exists with Name: {model.Name} and Brand: {model.Brand}. Message: {checkPreExisting.Message}");
                     return response;
                 }
 
@@ -321,8 +321,11 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                     Brand = model.Brand,
                     Description = model.Description,
                     ExpirationDays = model.ExpirationDays,
-                    Icon = new Icon() { Name = model.IconDTO.Name, Path = model.IconDTO.Path }
                 };
+
+                //sets icon to the pre-existing icon from model in DB if it exists otherwise creates a new one.
+                newItemTemplate.Icon = await Context.Icons.Where(i => i.Name == model.IconDTO.Name).FirstOrDefaultAsync() ??
+                        new Icon() { Name = model.IconDTO.Name, Path = model.IconDTO.Path };
 
                 //add pre-existing item tags from model
                 newItemTemplate.ItemTags.AddRange(await Context.ItemTags
@@ -354,8 +357,8 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 if (!checkAdded.Success)
                 {
                     response.Success = false;
-                    response.Message = $"Failed to save the new Item Template.";
-                    ITLogger.LogError($"Failed to add new Item Template to Database.");
+                    response.Message = $"Failed to save the new Item Template. Message: {checkAdded.Message}";
+                    ITLogger.LogError($"Failed to add new Item Template to Database. Message: {checkAdded.Message}");
                     return response;
                 }
                 
@@ -384,8 +387,8 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 if (!verifyPreExisting.Success)
                 {
                     response.Success = false;
-                    response.Message = $"Failed to find the specified Item Template to update";
-                    ITLogger.LogError($"Failed to find Item Template with original Name: {originalName} and original Brand: {originalBrand} to update.");
+                    response.Message = $"Failed to find the specified Item Template to update. Message: {verifyPreExisting.Message}";
+                    ITLogger.LogError($"Failed to find Item Template with original Name: {originalName} and original Brand: {originalBrand} to update. Message: {verifyPreExisting.Message}");
                     return response;
                 }
 
@@ -483,11 +486,11 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             {
                 Response<ItemTemplateDTO> verifyPreExisting = await RetrieveByNameAndBrand(name, brand);
 
-                if (verifyPreExisting.Data == null)
+                if (!verifyPreExisting.Success)
                 {
                     response.Success = false;
-                    response.Message = $"Failed to find Item Template with Name: {name} and Brand: {brand} to update status.";
-                    ITLogger.LogError($"Failed to find Item Template with Name: {name} and Brand: {brand} to update status");
+                    response.Message = $"Failed to find Item Template with Name: {name} and Brand: {brand} to update status. Message: {verifyPreExisting.Message}";
+                    ITLogger.LogError($"Failed to find Item Template with Name: {name} and Brand: {brand} to update status. Message: {verifyPreExisting.Message}");
                     return response;
                 }
 
@@ -538,8 +541,8 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 if (!verifyPreExisting.Success)
                 {
                     response.Success = false;
-                    response.Message = $"Failed to find Item Template with Name: {name} and Brand: {brand} to delete.";
-                    ITLogger.LogError($"Failed to find Item Template with Name: {name} and Brand: {brand} to set deleted status");
+                    response.Message = $"Failed to find Item Template with Name: {name} and Brand: {brand} to delete. Message: {verifyPreExisting.Message}";
+                    ITLogger.LogError($"Failed to find Item Template with Name: {name} and Brand: {brand} to set deleted status. Message: {verifyPreExisting.Message}");
                     return response;
                 }
 
@@ -578,11 +581,11 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             {
                 Response<ItemTemplateDTO> verifyPreExisting = await RetrieveByNameAndBrand(name, brand);
 
-                if (verifyPreExisting.Data == null)
+                if (!verifyPreExisting.Success)
                 {
                     response.Success = false;
-                    response.Message = $"Failed to find Item Template with Name: {name} and Brand: {brand} to permanently delete.";
-                    ITLogger.LogError($"Failed to find Item Template with Name: {name} and Brand: {brand} to permanently delete.");
+                    response.Message = $"Failed to find Item Template with Name: {name} and Brand: {brand} to permanently delete. Message: {verifyPreExisting.Message}";
+                    ITLogger.LogError($"Failed to find Item Template with Name: {name} and Brand: {brand} to permanently delete. Message: {verifyPreExisting.Message}");
                     return response;
                 }
 
@@ -597,7 +600,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 if (deletedItemTemplate.Status != Status.deleted)
                 {
                     response.Success = false;
-                    response.Message = $"Item Template permanent deletion failed - Status Error";
+                    response.Message = $"Item Template permanent deletion failed, not marked for deletion.";
                     ITLogger.LogError($"Item Template status was not set to deleted when attempting to delete permanently.");
                     return response;
                 }
@@ -609,8 +612,8 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
 
                 if(verifyDeleted.Success){
                     response.Success = false;
-                    response.Message = $"Item Template permanent deletion failed.";
-                    ITLogger.LogError($"Item Template permanent deletion from the Database failed.");
+                    response.Message = $"Item Template permanent deletion failed. Message: {verifyDeleted.Message}";
+                    ITLogger.LogError($"Item Template permanent deletion from the Database failed. Message: {verifyDeleted.Message}");
                     return response;
                 }
 
