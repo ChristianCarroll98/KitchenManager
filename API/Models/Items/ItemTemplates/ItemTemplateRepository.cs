@@ -50,8 +50,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 var itemTemplate = await Context
                         .ItemTemplates
                         .Include(x => x.ItemTags)
-                        .Where(it => it.Id == id &&
-                                it.Status != Status.deleted)
+                        .Where(it => it.Id == id)
                         .FirstOrDefaultAsync();
 
                 if(itemTemplate == null)

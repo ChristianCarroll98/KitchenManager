@@ -32,7 +32,9 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS
         {
             try
             {
-                return Ok($"User is null: {User == null}, User.Identity.Name: {User.Identity.Name}");
+                //UserManager.GenerateNewAuthenticatorKey();
+                //UserManager.GetAuthenticationTokenAsync();
+                return Ok($"User is null: {User == null}, User is authenticated: {User.Identity.IsAuthenticated}, User.Identity.Name: {User.Identity.Name}");
             }
             catch (Exception ex)
             {

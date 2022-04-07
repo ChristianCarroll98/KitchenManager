@@ -1,6 +1,7 @@
 ﻿using KitchenManager.API.SharedNS.ResponseNS;
 using KitchenManager.API.SharedNS.StatusNS;
 using KitchenManager.API.UsersNS.DTO;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -24,47 +25,47 @@ namespace KitchenManager.API.UsersNS.Repo
     {
         public Task<Response<UserDTO>> RetrieveById(int id)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public Task<Response<UserDTO>> RetrieveByUserName(string userName)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public Task<Response<UserDTO>> RetrieveByEmailAddress(string emailAddress)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
         
         public Task<Response<List<UserDTO>>> RetrieveByStatus(Status status)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
         
         public Task<Response<UserDTO>> Update(UserDTO model)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public Task<Response<UserDTO>> UpdateStatus(UserDTO model)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public Task<Response<UserDTO>> UpdateEmailAddress(UserDTO model)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public Task<Response<UserDTO>> Delete(UserDTO model)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public Task<Response<UserDTO>> ConfirmEmailAddress(UserDTO model)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

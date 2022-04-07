@@ -15,14 +15,13 @@ namespace KitchenManager.API.UserListsNS.DTO
         public UserDTO UserDTO { get; set; } = new();
 
         public UserListDTO() { }
-        public UserListDTO(UserList userList, bool includeItems)
+        public UserListDTO(UserList userList, bool includeListItems)
         {
             Name = userList.Name;
             Description = userList.Description;
             IconDTO = new IconDTO(userList.Icon);
-            if (includeItems) ListItemDTOs = userList.ListItems.Select(li => new ListItemDTO(li)).ToList();
-            else ListItemDTOs = new List<ListItemDTO>();
-            UserDTO = new UserDTO(userList.User);
+            if (includeListItems) ListItemDTOs = userList.ListItems.Select(li => new ListItemDTO(li)).ToList();
+            UserDTO = new UserDTO(userList.User, false);
         }
     }
 }
