@@ -26,7 +26,7 @@ namespace KitchenManager.API.ItemsNS
         [Column(TypeName = "varchar(256)")]
         public string Discriminator { get; set; }
 
-        public Icon Icon { get; set; }
+        public Icon Icon { get; set; } = new();
 
         public List<ItemTag> ItemTags { get; set; } = new List<ItemTag>();
 

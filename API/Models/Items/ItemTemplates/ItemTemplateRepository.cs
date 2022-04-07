@@ -25,7 +25,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
 
         Task<Response<ItemTemplateDTO>> Create(ItemTemplateDTO model);
         Task<Response<ItemTemplateDTO>> Update(ItemTemplateDTO model, string originalName, string originalBrand); //admin only
-        Task<Response<ItemTemplateDTO>> UpdateStatus(Status status, string name, string brand); //admin only
+        Task<Response<ItemTemplateDTO>> SetActiveStatus(string name, string brand); //admin only
         Task<Response<ItemTemplateDTO>> SetDeletedStatus(string name, string brand); //admin only
         Task<Response<ItemTemplateDTO>> Delete(string name, string brand); //admin only
     }   
@@ -49,8 +49,9 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             {
                 var itemTemplate = await Context
                         .ItemTemplates
-                        .Include(x => x.ItemTags)
-                        .Where(it => it.Id == id)
+                        .Include(it => it.ItemTags)
+                        .Include(it => it.Icon)
+                        .Where(itmp => itmp.Id == id)
                         .FirstOrDefaultAsync();
 
                 if(itemTemplate == null)
@@ -84,8 +85,10 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             {
                 var itemTemplates = await Context
                         .ItemTemplates
-                        .Include(x => x.ItemTags)
-                        .Where(it => it.Name == name)
+                        .Include(it => it.ItemTags)
+                        .Include(it => it.Icon)
+                        .Where(itmp => itmp.Name == name &&
+                                itmp.Status == Status.active)
                         .ToListAsync();
 
                 if (!itemTemplates.Any())
@@ -118,8 +121,10 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             {
                 var itemTemplates = await Context
                         .ItemTemplates
-                        .Include(x => x.ItemTags)
-                        .Where(it => it.Brand == brand)
+                        .Include(it => it.ItemTags)
+                        .Include(it => it.Icon)
+                        .Where(itmp => itmp.Brand == brand &&
+                                itmp.Status == Status.active)
                         .ToListAsync();
 
                 if (!itemTemplates.Any())
@@ -152,10 +157,11 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             {
                 var itemTemplate = await Context
                         .ItemTemplates
-                        .Include(x => x.ItemTags)
-                        .Where(it => it.Name == name &&
-                                it.Brand == brand &&
-                                it.Status != Status.deleted)
+                        .Include(it => it.ItemTags)
+                        .Include(it => it.Icon)
+                        .Where(itmp => itmp.Name == name &&
+                                itmp.Brand == brand &&
+                                itmp.Status == Status.active)
                         .FirstOrDefaultAsync();
 
                 if (itemTemplate == null)
@@ -192,19 +198,23 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 {
                     itemTemplates = await Context
                             .ItemTemplates
-                            .Include(x => x.ItemTags)
+                            .Include(it => it.ItemTags)
+                            .Include(it => it.Icon)
                             .Where(itmp => itmp.ItemTags
                                     .Select(it => it.Name)
                                     .Any(itn => tagNames
-                                            .Contains(itn)))
+                                            .Contains(itn)) &&
+                                    itmp.Status == Status.active)
                             .ToListAsync();
                 }
                 else
                 {
                     itemTemplates = await Context
                             .ItemTemplates
-                            .Include(x => x.ItemTags)
-                            .Where(itmp => !itmp.ItemTags.Any())
+                            .Include(it => it.ItemTags)
+                            .Include(it => it.Icon)
+                            .Where(itmp => !itmp.ItemTags.Any() &&
+                                    itmp.Status == Status.active)
                             .ToListAsync();
                 }
 
@@ -238,7 +248,8 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             {
                 var itemTemplates = await Context
                         .ItemTemplates
-                        .Include(x => x.ItemTags)
+                        .Include(it => it.ItemTags)
+                        .Include(it => it.Icon)
                         .Where(it => it.Status == status)
                         .ToListAsync();
 
@@ -272,8 +283,9 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             {
                 var itemTemplates = await Context
                         .ItemTemplates
-                        .Include(x => x.ItemTags)
-                        .Where(it => it.Status != Status.deleted)
+                        .Include(it => it.ItemTags)
+                        .Include(it => it.Icon)
+                        .Where(it => it.Status == Status.active)
                         .ToListAsync();
 
                 if (!itemTemplates.Any())
@@ -395,7 +407,8 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 //need actual Item Template object now, not ItemTemplateDTO.
                 var updatedItemTemplate = await Context
                         .ItemTemplates
-                        .Include(x => x.ItemTags)
+                        .Include(it => it.ItemTags)
+                        .Include(it => it.Icon)
                         .Where(it => it.Name == originalName
                                 && it.Brand == originalBrand)
                         .FirstOrDefaultAsync();
@@ -470,17 +483,9 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             return response;
         }
 
-        public async Task<Response<ItemTemplateDTO>> UpdateStatus(Status status, string name, string brand)
+        public async Task<Response<ItemTemplateDTO>> SetActiveStatus(string name, string brand)
         {
             Response<ItemTemplateDTO> response = new();
-
-            if (status == Status.deleted)
-            {
-                response.Success = false;
-                response.Message = $"Cannot set status to deleted.";
-                ITLogger.LogError($"Attempted to set status to deleted outside of SetDeleteStatus method.");
-                return response;
-            }
 
             try
             {
@@ -489,44 +494,36 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 if (!verifyPreExisting.Success)
                 {
                     response.Success = false;
-                    response.Message = $"Failed to find Item Template with Name: {name} and Brand: {brand} to update status. Message: {verifyPreExisting.Message}";
-                    ITLogger.LogError($"Failed to find Item Template with Name: {name} and Brand: {brand} to update status. Message: {verifyPreExisting.Message}");
+                    response.Message = $"Failed to find Item Template with Name: {name} and Brand: {brand} to activate. Message: {verifyPreExisting.Message}";
+                    ITLogger.LogError($"Failed to find Item Template with Name: {name} and Brand: {brand} to set active status. Message: {verifyPreExisting.Message}");
                     return response;
                 }
 
                 //need actual Item Template object now, not ItemTemplateDTO.
-                var updateStatusItemTemplate = await Context
+                var activatedStatusItemTemplate = await Context
                         .ItemTemplates
-                        .Include(x => x.ItemTags)
+                        .Include(it => it.ItemTags)
+                        .Include(it => it.Icon)
                         .Where(it => it.Name == name
                                 && it.Brand == brand)
                         .FirstOrDefaultAsync();
 
-                if (updateStatusItemTemplate.Status == status)
-                {
-                    response.Success = false;
-                    response.Message = $"Status of Item Template with Name: {name} and Brand: {brand} is already set to {status.ToString()}";
-                    ITLogger.LogError($"Status of Item Template with Name: {name} and Brand: {brand} is already set to {status.ToString()}");
-                    response.Data = new ItemTemplateDTO(updateStatusItemTemplate);
-                    return response;
-                }
+                activatedStatusItemTemplate.Status = Status.active;
 
-                updateStatusItemTemplate.Status = status;
-
-                Context.ItemTemplates.Update(updateStatusItemTemplate);
+                Context.ItemTemplates.Update(activatedStatusItemTemplate);
                 await Context.SaveChangesAsync();
 
-                response.Data = new ItemTemplateDTO(updateStatusItemTemplate);
+                response.Data = new ItemTemplateDTO(activatedStatusItemTemplate);
             }
             catch (Exception ex)
             {
                 response.Success = false;
-                response.Message = $"An error occured while attempting to update status for Item Template with Name: {name} and Brand: {brand}.";
-                ITLogger.LogError($"An error occured while attempting to update status for Item Template with Name: {name} and Brand: {brand}. Message: {ex.Message}");
+                response.Message = $"An error occured while attempting to activate Item Template with Name: {name} and Brand: {brand}.";
+                ITLogger.LogError($"An error occured while attempting to set active status for Item Template with Name: {name} and Brand: {brand}. Message: {ex.Message}");
                 return response;
             }
 
-            response.Message = $"Successfully updated status for Item Template with Name: {name} and Brand: {brand}.";
+            response.Message = $"Successfully activated Item Template with Name: {name} and Brand: {brand}.";
             return response;
         }
 
@@ -549,7 +546,8 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 //need actual Item Template object now, not ItemTemplateDTO.
                 var deletedStatusItemTemplate = await Context
                         .ItemTemplates
-                        .Include(x => x.ItemTags)
+                        .Include(it => it.ItemTags)
+                        .Include(it => it.Icon)
                         .Where(it => it.Name == name
                                 && it.Brand == brand)
                         .FirstOrDefaultAsync();
@@ -592,7 +590,8 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 //need actual Item Template object now, not ItemTemplateDTO.
                 var deletedItemTemplate = await Context
                         .ItemTemplates
-                        .Include(x => x.ItemTags)
+                        .Include(it => it.ItemTags)
+                        .Include(it => it.Icon)
                         .Where(it => it.Name == name
                                 && it.Brand == brand)
                         .FirstOrDefaultAsync();

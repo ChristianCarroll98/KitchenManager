@@ -14,6 +14,7 @@ using KitchenManager.API.ItemTagsNS;
 using KitchenManager.API.UsersNS;
 using KitchenManager.API.UserListsNS;
 using KitchenManager.API.SharedNS.StatusNS;
+using KitchenManager.API.IconsNS;
 
 namespace KitchenManager.API.Data.Seed
 {
@@ -188,7 +189,21 @@ namespace KitchenManager.API.Data.Seed
                 await Context.SaveChangesAsync();
             }
 
-            if(!(await Context.ItemTemplates.AnyAsync()))
+            if (!(await Context.Icons.AnyAsync()))
+            {
+                //Add test Icons
+                await Context.Icons.AddAsync(new Icon() { Name = "Icon1", Path = "Icon1 Path" });
+                await Context.Icons.AddAsync(new Icon() { Name = "Icon2", Path = "Icon2 Path" });
+                await Context.Icons.AddAsync(new Icon() { Name = "Icon3", Path = "Icon3 Path" });
+                await Context.Icons.AddAsync(new Icon() { Name = "Icon4", Path = "Icon4 Path" });
+                await Context.Icons.AddAsync(new Icon() { Name = "Icon5", Path = "Icon5 Path" });
+                await Context.Icons.AddAsync(new Icon() { Name = "Icon6", Path = "Icon6 Path" });
+                await Context.Icons.AddAsync(new Icon() { Name = "Icon7", Path = "Icon7 Path" });
+
+                await Context.SaveChangesAsync();
+            }
+
+            if (!(await Context.ItemTemplates.AnyAsync()))
             {
                 //Add ItemTemplates
                 var filePathItemTemplate = Path.Combine(RootPath, "API/Data/Seed/SeedData/SeedItemTemplates.json");
@@ -197,13 +212,16 @@ namespace KitchenManager.API.Data.Seed
 
                 foreach (var itemTemplateSeedModel in itemTemplateData)
                 {
+                    //get random icon
+                    var icon = await Context.Icons.Skip(Random.Next(Context.Icons.Count() - 1)).FirstOrDefaultAsync();
 
                     var itemTemplate = new ItemTemplate()
                     {
                         Name = itemTemplateSeedModel.Name,
                         Brand = itemTemplateSeedModel.Brand,
                         Description = itemTemplateSeedModel.Description,
-                        ExpirationDays = itemTemplateSeedModel.ExpirationDays
+                        ExpirationDays = itemTemplateSeedModel.ExpirationDays,
+                        Icon = icon
                     };
 
                     var takeNum = Random.Next(1, 4);
@@ -223,11 +241,15 @@ namespace KitchenManager.API.Data.Seed
                 {
                     var firstName = (await Context.UserClaims.Where(uc => uc.UserId == user.Id).FirstOrDefaultAsync()).ClaimValue;
 
+                    //get random icon
+                    var icon = await Context.Icons.Skip(Random.Next(Context.Icons.Count() - 1)).FirstOrDefaultAsync();
+
                     var userList = new UserList()
                     {
                         Name = firstName + "'s first list",
                         Description = "A list of random fake ingredient items.",
-                        User = user
+                        User = user,
+                        Icon = icon
                     };
 
                     await Context.UserLists.AddAsync(userList);
@@ -235,11 +257,14 @@ namespace KitchenManager.API.Data.Seed
                     //test multiple lists for some test users
                     if( Random.Next() % 3 == 0 ){
 
+                        icon = await Context.Icons.Skip(Random.Next(Context.Icons.Count() - 1)).FirstOrDefaultAsync();
+
                         userList = new UserList()
                         {
                             Name = firstName + "'s second list",
                             Description = "A list of random fake ingredient items.",
-                            User = user
+                            User = user,
+                            Icon = icon
                         };
 
                         await Context.UserLists.AddAsync(userList);
@@ -266,7 +291,8 @@ namespace KitchenManager.API.Data.Seed
                             Description = itemTemplate.Description,
                             Quantity = Random.Next(1, 5),
                             ExpirationDate = DateTime.UtcNow.AddDays(itemTemplate.ExpirationDays).Date,
-                            UserList = userList
+                            UserList = userList,
+                            Icon = itemTemplate.Icon
                         };
 
                         var itemTags = await Context.ItemTags.Where(it => it.Items.Contains(itemTemplate)).ToListAsync();

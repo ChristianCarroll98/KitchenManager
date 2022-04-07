@@ -1,11 +1,15 @@
 ﻿using KitchenManager.API.Data;
 using KitchenManager.API.IconsNS;
+using KitchenManager.API.ItemsNS.ItemTemplatesNS;
+using KitchenManager.API.ItemsNS.ItemTemplatesNS.DTO;
+using KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo;
 using KitchenManager.API.ItemsNS.ListItemsNS.DTO;
 using KitchenManager.API.ItemTagsNS;
 using KitchenManager.API.SharedNS.ResponseNS;
 using KitchenManager.API.SharedNS.StatusNS;
 using KitchenManager.API.UserListsNS;
 using KitchenManager.API.UserListsNS.DTO;
+using KitchenManager.API.UsersNS;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -25,10 +29,11 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
         Task<Response<List<ListItemDTO>>> RetrieveByUserList(string userName, string userListName);
 
         Task<Response<ListItemDTO>> Create(string userName, string userListName, ListItemDTO model);
+        Task<Response<ListItemDTO>> CreateFromItemTemplate(string userName, string userListName, ItemTemplateDTO model);
         Task<Response<ListItemDTO>> Update(string userName, string userListName, string originalName, string originalBrand, ListItemDTO model);
         Task<Response<ListItemDTO>> SetQuantity(string userName, string userListName, string name, string brand, int quantity);
         Task<Response<ListItemDTO>> SetActiveStatus(string userName, string userListName, string name, string brand);
-        Task<Response<ListItemDTO>> SetDeleteStatus(string userName, string userListName, string name, string brand);
+        Task<Response<ListItemDTO>> SetDeletedStatus(string userName, string userListName, string name, string brand);
         Task<Response<ListItemDTO>> Delete(string userName, string userListName, string name, string brand);
     }
 
@@ -36,9 +41,11 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
     {
         private readonly KMDbContext Context;
         private readonly ILogger<ListItemRepository> LILogger;
+        private readonly IItemTemplateRepository ITRepo;
 
-        public ListItemRepository(KMDbContext context, ILogger<ListItemRepository> lILogger)
+        public ListItemRepository(IItemTemplateRepository iTRepo, KMDbContext context, ILogger<ListItemRepository> lILogger)
         {
+            ITRepo = iTRepo;
             Context = context;
             LILogger = lILogger;
         }
@@ -48,10 +55,14 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             Response<ListItemDTO> response = new();
 
             try
-            {
+            {   
                 var listItem = await Context
                         .ListItems
-                        .Include(x => x.ItemTags)
+                        .Include(li => li.ItemTags)
+                        .Include(li => li.Icon)
+                        ///TODO \/
+                        //.Include(li => li.UserList).ThenInclude(ul => ul.Name).ThenInclude(u => u.UserName) 
+                        //.Include(li => li.UserList).ThenInclude(ul => ul.Name)
                         .Where(li => li.Id == id)
                         .FirstOrDefaultAsync();
 
@@ -86,10 +97,12 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             {
                 var listItems = await Context
                         .ListItems
-                        .Include(x => x.ItemTags)
+                        .Include(li => li.ItemTags)
+                        .Include(li => li.Icon)
                         .Where(li => li.UserList.User.UserName == userName &&
                                 li.UserList.Name == userListName &&
-                                li.Brand == brand)
+                                li.Brand == brand &&
+                                li.Status == Status.active)
                         .ToListAsync();
 
                 if (!listItems.Any())
@@ -123,7 +136,8 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             {
                 var listItem = await Context
                         .ListItems
-                        .Include(x => x.ItemTags)
+                        .Include(li => li.ItemTags)
+                        .Include(li => li.Icon)
                         .Where(li => li.UserList.User.UserName == userName &&
                                 li.UserList.Name == userListName &&
                                 li.Name == name &&
@@ -161,7 +175,8 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             {
                 var listItems = await Context
                         .ListItems
-                        .Include(x => x.ItemTags)
+                        .Include(li => li.ItemTags)
+                        .Include(li => li.Icon)
                         .Where(li => li.UserList.User.UserName == userName &&
                                 li.UserList.Name == userListName &&
                                 li.Status == status)
@@ -203,12 +218,14 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                     listItems = await Context
                             .ListItems
                             .Include(li => li.ItemTags)
+                            .Include(li => li.Icon)
                             .Where(li => li.UserList.User.UserName == userName &&
                                     li.UserList.Name == userListName &&
                                     li.ItemTags
                                             .Select(it => it.Name)
                                             .Any(itn => tagNames
-                                                    .Contains(itn)))
+                                                    .Contains(itn)) &&
+                                    li.Status == Status.active)
                             .ToListAsync();
                 }
                 else
@@ -216,9 +233,11 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                     listItems = await Context
                             .ListItems
                             .Include(li => li.ItemTags)
+                            .Include(li => li.Icon)
                             .Where(li => li.UserList.User.UserName == userName &&
                                     li.UserList.Name == userListName &&
-                                    !li.ItemTags.Any())
+                                    !li.ItemTags.Any() &&
+                                    li.Status == Status.active)
                             .ToListAsync();
                 }
 
@@ -252,9 +271,11 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             {
                 var listItems = await Context
                         .ListItems
-                        .Include(x => x.ItemTags)
+                        .Include(li => li.ItemTags)
+                        .Include(li => li.Icon)
                         .Where(li => li.UserList.User.UserName == userName &&
-                                li.UserList.Name == userListName)
+                                li.UserList.Name == userListName &&
+                                li.Status == Status.active)
                         .ToListAsync();
 
                 if (!listItems.Any())
@@ -294,6 +315,14 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                     response.Message = $"Could not find specified User List.";
                     LILogger.LogError($"User {userName} has no list: {userListName}.");
                     return response;
+                }
+
+                Response<ItemTemplateDTO> itemTemplateCheck = ITRepo.RetrieveByNameAndBrand(model.Name, model.Brand).Result;
+
+                if (itemTemplateCheck.Success)
+                {
+                    LILogger.LogInformation($"There is an Item Template with Name: {model.Name} and Brand: {model.Brand} already. Redirecting to CreateFromItemTemplate method.");
+                    return CreateFromItemTemplate(userName, userListName, itemTemplateCheck.Data).Result;
                 }
 
                 Response<ListItemDTO> checkPreExisting = await RetrieveByUserListAndNameAndBrand(userName, userListName, model.Name, model.Brand);
@@ -343,6 +372,19 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                     itemTag.Status = Status.active;
                 }
 
+                //create item template from item since it was not previously a template.
+                var newItemTemplate = new ItemTemplate()
+                {
+                    Name = newListItem.Name,
+                    Brand = newListItem.Brand,
+                    Description = newListItem.Description,
+                    ExpirationDays = (newListItem.ExpirationDate - DateTime.UtcNow).Days,
+                    Status = Status.inactive, //waiting to be edited/approved by an admin
+                    Icon = newListItem.Icon,
+                    ItemTags = newListItem.ItemTags
+                };
+
+                await Context.ItemTemplates.AddAsync(newItemTemplate);
                 await Context.ListItems.AddAsync(newListItem);
                 await Context.SaveChangesAsync();
 
@@ -369,7 +411,108 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             response.Message = $"Successfully created new List Item with Name: {response.Data.Name} and Brand: {response.Data.Brand}.";
             return response;
         }
-        
+
+        public async Task<Response<ListItemDTO>> CreateFromItemTemplate(string userName, string userListName, ItemTemplateDTO itemTemplateModel)
+        {
+            Response<ListItemDTO> response = new();
+
+            try
+            {
+                UserList userList = await Context.UserLists.Where(ul => ul.User.UserName == userName && ul.Name == userListName).FirstOrDefaultAsync();
+
+                if (userList == null)
+                {
+                    response.Success = false;
+                    response.Message = $"Could not find specified User List.";
+                    LILogger.LogError($"User {userName} has no list: {userListName}.");
+                    return response;
+                }
+
+                Response<ListItemDTO> checkPreExisting = await RetrieveByUserListAndNameAndBrand(userName, userListName, itemTemplateModel.Name, itemTemplateModel.Brand);
+
+                if (checkPreExisting.Success)
+                {
+                    response.Success = false;
+                    response.Message = $"A List Item already exists in this list with Name: {itemTemplateModel.Name} and Brand: {itemTemplateModel.Brand}. Message: {checkPreExisting.Message}";
+                    response.Data = checkPreExisting.Data;
+                    LILogger.LogError($"A List Item already exists in {userName}'s list: {userListName} with Name: {itemTemplateModel.Name} and Brand: {itemTemplateModel.Brand}. Message: {checkPreExisting.Message}");
+                    return response;
+                }
+
+                Response<ItemTemplateDTO> checkItemTemplatePreExisting = await ITRepo.RetrieveByNameAndBrand(itemTemplateModel.Name, itemTemplateModel.Brand);
+
+                if (!checkItemTemplatePreExisting.Success)
+                {
+                    response.Success = false;
+                    response.Message = $"No Item Template with Name: {itemTemplateModel.Name} and Brand: {itemTemplateModel.Brand} exists. Message: {checkPreExisting.Message}";
+                    response.Data = checkPreExisting.Data;
+                    LILogger.LogError($"No Item Template with Name: {itemTemplateModel.Name} and Brand: {itemTemplateModel.Brand} exists.");
+                    return response;
+                }
+
+                var newListItem = new ListItem()
+                {
+                    Name = itemTemplateModel.Name,
+                    Brand = itemTemplateModel.Brand,
+                    Description = itemTemplateModel.Description,
+                    Quantity = 1,
+                    ExpirationDate = DateTime.UtcNow.AddDays(itemTemplateModel.ExpirationDays).Date,
+                    UserList = userList
+                };
+
+                //sets icon to the pre-existing icon from model in DB if it exists otherwise creates a new one.
+                newListItem.Icon = await Context.Icons.Where(i => i.Name == itemTemplateModel.IconDTO.Name).FirstOrDefaultAsync() ??
+                        new Icon() { Name = itemTemplateModel.IconDTO.Name, Path = itemTemplateModel.IconDTO.Path };
+
+                //add pre-existing item tags from model
+                newListItem.ItemTags.AddRange(await Context.ItemTags
+                        .Where(it => itemTemplateModel.ItemTagDTOs
+                                .Select(itdto => itdto.Name)
+                                .Contains(it.Name))
+                        .ToListAsync());
+
+                //add new item tags from model
+                newListItem.ItemTags.AddRange(itemTemplateModel.ItemTagDTOs
+                        .Where(itdto => !Context.ItemTags
+                                .Select(it => it.Name)
+                                .Contains(itdto.Name))
+                        .Select(itdto => new ItemTag() { Name = itdto.Name })
+                        .ToList());
+
+                //make sure inactive tags are set to active when assigned to this list item.
+                var inactiveTags = newListItem.ItemTags.Where(it => it.Status != Status.active).ToList();
+                foreach (ItemTag itemTag in inactiveTags)
+                {
+                    itemTag.Status = Status.active;
+                }
+
+                await Context.ListItems.AddAsync(newListItem);
+                await Context.SaveChangesAsync();
+
+                Response<ListItemDTO> checkAdded = await RetrieveByUserListAndNameAndBrand(userName, userListName, itemTemplateModel.Name, itemTemplateModel.Brand);
+
+                if (!checkAdded.Success)
+                {
+                    response.Success = false;
+                    response.Message = $"Failed to add the new List Item from Template. Message: {checkAdded.Message}";
+                    LILogger.LogError($"Failed to add new List Item from Template to Database in {userName}'s list: {userListName}. Message: {checkAdded.Message}");
+                    return response;
+                }
+
+                response.Data = checkAdded.Data;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occured while attempting to create a new List Item from Template.";
+                LILogger.LogError($"An error occured while attempting to create a new List Item from Template. Message: {ex.Message}");
+                return response;
+            }
+
+            response.Message = $"Successfully created new List Item from Template with Name: {response.Data.Name} and Brand: {response.Data.Brand}.";
+            return response;
+        }
+
         public async Task<Response<ListItemDTO>> Update(string userName, string userListName, string originalName, string originalBrand, ListItemDTO model)
         {
             Response<ListItemDTO> response = new();
@@ -390,6 +533,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 var updatedListItem = await Context
                         .ListItems
                         .Include(li => li.ItemTags)
+                        .Include(li => li.Icon)
                         .Where(li => li.Name == originalName
                                 && li.Brand == originalBrand)
                         .FirstOrDefaultAsync();
@@ -484,6 +628,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 var updatedListItem = await Context
                         .ListItems
                         .Include(li => li.ItemTags)
+                        .Include(li => li.Icon)
                         .Where(li => li.Name == name
                                 && li.Brand == brand)
                         .FirstOrDefaultAsync();
@@ -526,12 +671,14 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 //need actual List Item object now, not ListItemDTO.
                 var activatedStatusListItem = await Context
                         .ListItems
-                        .Include(x => x.ItemTags)
+                        .Include(li => li.ItemTags)
+                        .Include(li => li.Icon)
                         .Where(it => it.Name == name
                                 && it.Brand == brand)
                         .FirstOrDefaultAsync();
 
                 activatedStatusListItem.Status = Status.active;
+                activatedStatusListItem.DeletedDate = DateTime.MaxValue;
 
                 Context.ListItems.Update(activatedStatusListItem);
                 await Context.SaveChangesAsync();
@@ -550,7 +697,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             return response;
         }
 
-        public async Task<Response<ListItemDTO>> SetDeleteStatus(string userName, string userListName, string name, string brand)
+        public async Task<Response<ListItemDTO>> SetDeletedStatus(string userName, string userListName, string name, string brand)
         {
             Response<ListItemDTO> response = new();
 
@@ -569,12 +716,15 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 //need actual List Item object now, not ListItemDTO.
                 var deletedStatusListItem = await Context
                         .ListItems
-                        .Include(x => x.ItemTags)
+                        .Include(li => li.ItemTags)
+                        .Include(li => li.Icon)
                         .Where(it => it.Name == name
                                 && it.Brand == brand)
                         .FirstOrDefaultAsync();
 
                 deletedStatusListItem.Status = Status.deleted;
+
+                deletedStatusListItem.DeletedDate = DateTime.UtcNow;
 
                 Context.ListItems.Update(deletedStatusListItem);
                 await Context.SaveChangesAsync();
@@ -612,7 +762,8 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 //need actual List Item object now, not ListItemDTO.
                 var deletedListItem = await Context
                         .ListItems
-                        .Include(x => x.ItemTags)
+                        .Include(li => li.ItemTags)
+                        .Include(li => li.Icon)
                         .Where(it => it.Name == name
                                 && it.Brand == brand)
                         .FirstOrDefaultAsync();

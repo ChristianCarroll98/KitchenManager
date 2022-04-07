@@ -86,7 +86,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
             }
             catch (Exception ex)
             {
-
+                ITLogger.LogError($"Failed to retrieve Item Template with Name: {name} and Brand: {brand}. Message: {ex.Message}");
                 return BadRequest($"Failed to retrieve Item Template with Name: {name} and Brand: {brand}. Message: {ex.Message}");
             }
         }
@@ -172,18 +172,18 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
             }
         }
 
-        [Route("UpdateStatus")]
+        [Route("SetActiveStatus")]
         [HttpPost]
-        public IActionResult UpdateStatus(Status status, string name, string brand)
+        public IActionResult SetActiveStatus(string name, string brand)
         {
             try
             {
-                return Ok(ITRepo.UpdateStatus(status, name, brand).Result);
+                return Ok(ITRepo.SetActiveStatus(name, brand).Result);
             }
             catch (Exception ex)
             {
-                ITLogger.LogError($"Failed to update status for Item Template with Name: {name} and Brand: {brand}. Message: {ex}");
-                return BadRequest($"Failed to update status for Item Template with Name: {name} and Brand: {brand}");
+                ITLogger.LogError($"Failed to set active status for Item Template with Name: {name} and Brand: {brand}. Message: {ex}");
+                return BadRequest($"Failed to activate Item Template with Name: {name} and Brand: {brand}");
             }
         }
 
