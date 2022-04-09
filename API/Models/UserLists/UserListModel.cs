@@ -3,6 +3,7 @@ using KitchenManager.API.ItemsNS.ListItemsNS;
 using KitchenManager.API.UsersNS;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KitchenManager.API.UserListsNS
 {
@@ -12,6 +13,10 @@ namespace KitchenManager.API.UserListsNS
         public int Id { get; set; } = 0;
 
         [Required]
+        [ForeignKey("User")]
+        public int UserId { get; set; }
+
+        [Required]
         [MaxLength(256)]
         public string Name { get; set; } = string.Empty;
 
@@ -19,8 +24,6 @@ namespace KitchenManager.API.UserListsNS
         public string Description { get; set; } = string.Empty;
 
         public IconModel Icon { get; set; }
-
-        public User User { get; set; }
 
         public List<ListItemModel> ListItems { get; set; } = new();
     }

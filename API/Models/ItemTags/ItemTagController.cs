@@ -25,7 +25,7 @@ namespace KitchenManager.API.ItemTagsNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<ResponseModel<List<ItemTagDTO>>> RetrieveByName(string name)
+        public ActionResult<ResponseModel<List<string>>> RetrieveByName(string name)
         {
             try
             {
@@ -42,7 +42,7 @@ namespace KitchenManager.API.ItemTagsNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<ResponseModel<List<ItemTagDTO>>> RetrieveByStatus(Status status)
+        public ActionResult<ResponseModel<List<string>>> RetrieveByStatus(Status status)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace KitchenManager.API.ItemTagsNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<ResponseModel<List<ItemTagDTO>>> RetrieveAll()
+        public ActionResult<ResponseModel<List<string>>> RetrieveAll()
         {
             try
             {

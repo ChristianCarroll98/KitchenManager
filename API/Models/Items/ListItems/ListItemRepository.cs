@@ -894,7 +894,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 }
 
                 var userList = await Context.UserLists
-                        .Where(ul => ul.User.Email == userEmail &&
+                        .Where(ul => ul.UserId == user.Id &&
                                 ul.Name == userListName)
                         .FirstOrDefaultAsync();
 

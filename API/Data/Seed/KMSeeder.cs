@@ -70,7 +70,7 @@ namespace KitchenManager.API.Data.Seed
                     {
                         admin = new User()
                         {
-                            //UserName = adminSeedModel.Email,
+                            UserName = adminSeedModel.Email,
                             Email = adminSeedModel.Email,
                             NormalizedEmail = adminSeedModel.Email.Normalize()
                         };
@@ -127,7 +127,7 @@ namespace KitchenManager.API.Data.Seed
                     {
                         user = new User()
                         {
-                            //UserName = userSeedModel.Email,
+                            UserName = userSeedModel.Email,
                             Email = userSeedModel.Email,
                             NormalizedEmail = userSeedModel.Email.Normalize()
                         };
@@ -229,7 +229,7 @@ namespace KitchenManager.API.Data.Seed
 
                     itemTemplate.ItemTags = itemTags;
 
-                    await Context.ItemTemplates.AddAsync(itemTemplate);
+                    Context.ItemTemplates.Add(itemTemplate);
                 }
 
                 await Context.SaveChangesAsync();
@@ -248,7 +248,7 @@ namespace KitchenManager.API.Data.Seed
                     {
                         Name = firstName + "'s first list",
                         Description = "A list of random fake ingredient items.",
-                        User = user,
+                        UserId = user.Id,
                         Icon = icon
                     };
 
@@ -263,11 +263,11 @@ namespace KitchenManager.API.Data.Seed
                         {
                             Name = firstName + "'s second list",
                             Description = "A list of random fake ingredient items.",
-                            User = user,
+                            UserId = user.Id,
                             Icon = icon
                         };
 
-                        await Context.UserLists.AddAsync(userList);
+                        Context.UserLists.Add(userList);
                     }
                 }
 
@@ -290,8 +290,7 @@ namespace KitchenManager.API.Data.Seed
                             Brand = itemTemplate.Brand,
                             Description = itemTemplate.Description,
                             Quantity = Random.Next(1, 5),
-                            ExpirationDate = DateTime.UtcNow.AddDays(itemTemplate.ExpirationDays).Date,
-                            UserList = userList,
+                            ExpirationDate = DateTime.UtcNow.AddDays(itemTemplate.ExpirationDays.Value).Date,
                             Icon = itemTemplate.Icon
                         };
 

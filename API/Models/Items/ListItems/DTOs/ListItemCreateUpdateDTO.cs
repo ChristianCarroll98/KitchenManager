@@ -12,8 +12,6 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.DTO
         public DateTime? ExpirationDate { get; set; }
         public string IconName { get; set; }
         public string IconPath { get; set; }
-        public string UserEmail { get; set; }
-        public string UserListName { get; set; }
         public List<string> ItemTagNames { get; set; }
     }
 }
