@@ -17,7 +17,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.DTO
             Name = itemTemplate.Name ?? string.Empty;
             Brand = itemTemplate.Brand ?? string.Empty;
             Description = itemTemplate.Description ?? string.Empty;
-            ExpirationDays = itemTemplate == null ? -1 : itemTemplate.ExpirationDays;
+            ExpirationDays = itemTemplate.ExpirationDays;
             IconPath = itemTemplate.Icon.Path ?? string.Empty;
             ItemTagNames = itemTemplate.ItemTags.Select(it => it.Name).ToList() ?? new List<string>();
         }

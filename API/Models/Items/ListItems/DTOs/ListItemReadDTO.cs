@@ -10,7 +10,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.DTO
         public string Brand { get; set; }
         public string Description { get; set; }
         public int Quantity { get; set; }
-        public DateTime? ExpirationDate { get; set; }
+        public DateTime ExpirationDate { get; set; }
         public string IconPath { get; set; }
         public List<string> ItemTagNames { get; set; }
 
@@ -19,8 +19,8 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.DTO
             Name = listItem.Name ?? string.Empty;
             Brand = listItem.Brand ?? string.Empty;
             Description = listItem.Description ?? string.Empty;
-            Quantity = listItem.Quantity;
-            ExpirationDate = listItem.ExpirationDate;
+            Quantity = listItem == null ? 1 : listItem.Quantity;
+            ExpirationDate = listItem == null ? DateTime.MaxValue : listItem.ExpirationDate;
             IconPath = listItem.Icon.Path ?? string.Empty;
             ItemTagNames = listItem.ItemTags.Select(it => it.Name).ToList() ?? new List<string>();
         }

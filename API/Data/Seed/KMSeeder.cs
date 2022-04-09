@@ -178,17 +178,17 @@ namespace KitchenManager.API.Data.Seed
             if (!(await Context.ItemTags.AnyAsync()))
             {
                 //Add Item Tags
-                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Fruit", Pinned = false });
-                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Vegitable", Pinned = false });
-                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Poultry", Pinned = false });
-                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Fish", Pinned = false });
-                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Meat", Pinned = false });
-                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Leftovers", Pinned = false });
-                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Spice", Pinned = false });
+                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Fruit", Pinned = true });
+                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Vegitable", Pinned = true });
+                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Poultry", Pinned = true });
+                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Fish", Pinned = true });
+                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Meat", Pinned = true });
+                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Leftovers", Pinned = true });
+                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Spice", Pinned = true });
 
                 await Context.SaveChangesAsync();
             }
-
+            
             if (!(await Context.Icons.AnyAsync()))
             {
                 //Add test Icons

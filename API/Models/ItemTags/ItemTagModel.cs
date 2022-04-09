@@ -14,7 +14,7 @@ namespace KitchenManager.API.ItemTagsNS
         [MaxLength(256)]
         public string Name { get; set; } = string.Empty;
 
-        public bool Pinned { get; set; } = true;
+        public bool Pinned { get; set; } = false;
 
         public List<ItemModel> Items { get; set; } = new();
 
