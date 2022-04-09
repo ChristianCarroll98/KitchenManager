@@ -51,7 +51,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                         .ItemTemplates
                         .Include(it => it.ItemTags)
                         .Include(it => it.Icon)
-                        .Where(itmp => itmp.Id == id)
+                        .Where(it => it.Id == id)
                         .FirstOrDefaultAsync();
 
                 if(itemTemplate == null)
@@ -87,8 +87,8 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                         .ItemTemplates
                         .Include(it => it.ItemTags)
                         .Include(it => it.Icon)
-                        .Where(itmp => itmp.Name == name &&
-                                itmp.Status == Status.active)
+                        .Where(it => it.Name == name &&
+                                it.Status == Status.active)
                         .ToListAsync();
 
                 if (!itemTemplates.Any())
@@ -123,8 +123,8 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                         .ItemTemplates
                         .Include(it => it.ItemTags)
                         .Include(it => it.Icon)
-                        .Where(itmp => itmp.Brand == brand &&
-                                itmp.Status == Status.active)
+                        .Where(it => it.Brand == brand &&
+                                it.Status == Status.active)
                         .ToListAsync();
 
                 if (!itemTemplates.Any())
@@ -159,9 +159,8 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                         .ItemTemplates
                         .Include(it => it.ItemTags)
                         .Include(it => it.Icon)
-                        .Where(itmp => itmp.Name == name &&
-                                itmp.Brand == brand &&
-                                itmp.Status == Status.active)
+                        .Where(it => it.Name == name &&
+                                it.Brand == brand) //dont check for active here so I can update from inactive to active.
                         .FirstOrDefaultAsync();
 
                 if (itemTemplate == null)
@@ -321,25 +320,21 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                     Brand = model.Brand,
                     Description = model.Description,
                     ExpirationDays = model.ExpirationDays,
+                    Icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync() ??
+                            new IconModel() { Name = model.IconName, Path = model.IconPath },
+                    //add pre-existing item tags from model
+                    ItemTags = await Context.ItemTags
+                            .Where(it => model.ItemTagNames
+                                    .Contains(it.Name))
+                        .Concat(
+                        //add new item tags from model
+                        model.ItemTagNames
+                                .Where(itname => !Context.ItemTags
+                                        .Select(it => it.Name)
+                                        .Contains(itname))
+                                .Select(itname => new ItemTagModel() { Name = itname }))
+                        .ToListAsync()
                 };
-
-                //sets icon to the pre-existing icon from model in DB if it exists otherwise creates a new one.
-                newItemTemplate.Icon = await Context.Icons.Where(i => i.Name == model.IconCreateUpdateDTO.Name).FirstOrDefaultAsync() ??
-                        new IconModel() { Name = model.IconCreateUpdateDTO.Name, Path = model.IconCreateUpdateDTO.Path };
-
-                //add pre-existing item tags from model
-                newItemTemplate.ItemTags.AddRange(await Context.ItemTags
-                        .Where(it => model.ItemTagNames
-                                .Contains(it.Name))
-                        .ToListAsync());
-
-                //add new item tags from model
-                newItemTemplate.ItemTags.AddRange(model.ItemTagNames
-                        .Where(itname => !Context.ItemTags
-                                .Select(it => it.Name)
-                                .Contains(itname))
-                        .Select(itname => new ItemTagModel() { Name = itname })
-                        .ToList());
 
                 //make sure inactive tags are set to active when assigned to this item Template.
                 var inactiveTags = newItemTemplate.ItemTags.Where(it => it.Status != Status.active).ToList();
@@ -399,34 +394,25 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                         .Where(it => it.Name == originalName
                                 && it.Brand == originalBrand)
                         .FirstOrDefaultAsync();
-
-                updatedItemTemplate.Name = model.Name;
-
-                updatedItemTemplate.Brand = model.Brand;
-
-                updatedItemTemplate.Description = model.Description;
-
+                
+                updatedItemTemplate.Name = model.Name ?? updatedItemTemplate.Name;
+                updatedItemTemplate.Brand = model.Brand ?? updatedItemTemplate.Brand;
+                updatedItemTemplate.Description = model.Description ?? updatedItemTemplate.Description;
                 updatedItemTemplate.ExpirationDays = model.ExpirationDays;
-
-                //sets icon to the pre-existing icon from model in DB if it exists otherwise creates a new one.
-                updatedItemTemplate.Icon = await Context.Icons.Where(i => i.Name == model.IconCreateUpdateDTO.Name).FirstOrDefaultAsync() ?? 
-                        new IconModel() { Name = model.IconCreateUpdateDTO.Name, Path = model.IconCreateUpdateDTO.Path };
-
-                updatedItemTemplate.ItemTags.Clear();
-
+                updatedItemTemplate.Icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync() ??
+                        new IconModel() { Name = model.IconName, Path = model.IconPath };
                 //add pre-existing item tags from model
-                updatedItemTemplate.ItemTags.AddRange(await Context.ItemTags
+                updatedItemTemplate.ItemTags = await Context.ItemTags
                         .Where(it => model.ItemTagNames
                                 .Contains(it.Name))
-                        .ToListAsync());
-
-                //add new item tags from model
-                updatedItemTemplate.ItemTags.AddRange(model.ItemTagNames
-                        .Where(itname => !Context.ItemTags
-                                .Select(it => it.Name)
-                                .Contains(itname))
-                        .Select(itname => new ItemTagModel() { Name = itname })
-                        .ToList());
+                    .Concat(
+                    //add new item tags from model
+                    model.ItemTagNames
+                            .Where(itname => !Context.ItemTags
+                                    .Select(it => it.Name)
+                                    .Contains(itname))
+                            .Select(itname => new ItemTagModel() { Name = itname }))
+                    .ToListAsync();
 
                 //make sure inactive tags are set to active when assigned to this item Template.
                 var inactiveTags = updatedItemTemplate.ItemTags.Where(it => it.Status != Status.active).ToList();
@@ -440,17 +426,10 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
 
                 //update item tags' status to inactive if admin created or to deleted if user created
                 //if any were removed from all item templates and list items.
-                var noItemsItemTags = await Context.ItemTags.Where(it => !it.Items.Any()).ToListAsync();
-                foreach(ItemTagModel itemTag in noItemsItemTags)
+                var noItemsItemTags = Context.ItemTags.Where(it => !it.Items.Any());
+                foreach (ItemTagModel itemTag in noItemsItemTags)
                 {
-                    if (itemTag.Pinned)
-                    {
-                        itemTag.Status = Status.inactive;
-                    }
-                    else
-                    {
-                        itemTag.Status = Status.deleted;
-                    }
+                    itemTag.Status = itemTag.Pinned ? Status.inactive : Status.deleted;
                 }
 
                 await Context.SaveChangesAsync();
@@ -490,8 +469,8 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                         .ItemTemplates
                         .Include(it => it.ItemTags)
                         .Include(it => it.Icon)
-                        .Where(it => it.Name == name
-                                && it.Brand == brand)
+                        .Where(it => it.Name == name &&
+                                it.Brand == brand)
                         .FirstOrDefaultAsync();
 
                 activatedStatusItemTemplate.Status = Status.active;
@@ -534,8 +513,8 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                         .ItemTemplates
                         .Include(it => it.ItemTags)
                         .Include(it => it.Icon)
-                        .Where(it => it.Name == name
-                                && it.Brand == brand)
+                        .Where(it => it.Name == name &&
+                                it.Brand == brand)
                         .FirstOrDefaultAsync();
 
                 deletedStatusItemTemplate.Status = Status.deleted;
@@ -604,17 +583,10 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
 
                 //update item tags' status if admin created or delete if user created
                 //if any were removed from all item templates and list items.
-                var noItemsItemTags = await Context.ItemTags.Where(it => !it.Items.Any()).ToListAsync();
+                var noItemsItemTags = Context.ItemTags.Where(it => !it.Items.Any());
                 foreach (ItemTagModel itemTag in noItemsItemTags)
                 {
-                    if (itemTag.Pinned)
-                    {
-                        itemTag.Status = Status.inactive;
-                    }
-                    else
-                    {
-                        itemTag.Status = Status.deleted;
-                    }
+                    itemTag.Status = itemTag.Pinned ? Status.inactive : Status.deleted;
                 }
 
                 await Context.SaveChangesAsync();

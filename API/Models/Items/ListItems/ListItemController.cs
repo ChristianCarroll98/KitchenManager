@@ -3,8 +3,6 @@ using KitchenManager.API.ItemsNS.ListItemsNS.DTO;
 using KitchenManager.API.ItemsNS.ListItemsNS.Repo;
 using KitchenManager.API.SharedNS.ResponseNS;
 using KitchenManager.API.SharedNS.StatusNS;
-using KitchenManager.API.UsersNS;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;

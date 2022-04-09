@@ -1,5 +1,4 @@
-﻿using KitchenManager.API.IconsNS.DTO;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.DTO
 {
@@ -9,7 +8,8 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.DTO
         public string Brand { get; set; }
         public string Description { get; set; }
         public int? ExpirationDays { get; set; }
-        public IconCreateUpdateDTO IconCreateUpdateDTO { get; set; }
+        public string IconName { get; set; }
+        public string IconPath { get; set; }
         public List<string> ItemTagNames { get; set; }
     }
 }

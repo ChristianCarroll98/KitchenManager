@@ -1,6 +1,4 @@
-﻿using KitchenManager.API.IconsNS.DTO;
-using KitchenManager.API.ItemsNS.ListItemsNS.DTO;
-using KitchenManager.API.UsersNS.DTO;
+﻿using KitchenManager.API.ItemsNS.ListItemsNS.DTO;
 using System.Collections.Generic;
 using System.Linq;
 

@@ -1,10 +1,4 @@
-﻿using KitchenManager.API.IconsNS.DTO;
-using KitchenManager.API.ItemsNS.ListItemsNS.DTO;
-using KitchenManager.API.UsersNS.DTO;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace KitchenManager.API.UserListsNS.DTO
+﻿namespace KitchenManager.API.UserListsNS.DTO
 {
     public class UserListReadMinDTO
     {

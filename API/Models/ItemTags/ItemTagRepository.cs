@@ -1,7 +1,4 @@
 ﻿using KitchenManager.API.Data;
-using KitchenManager.API.ItemsNS;
-using KitchenManager.API.ItemsNS.ItemTemplatesNS.DTO;
-using KitchenManager.API.ItemTagsNS.DTO;
 using KitchenManager.API.SharedNS.ResponseNS;
 using KitchenManager.API.SharedNS.StatusNS;
 using Microsoft.EntityFrameworkCore;

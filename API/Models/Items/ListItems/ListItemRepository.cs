@@ -2,14 +2,11 @@
 using KitchenManager.API.IconsNS;
 using KitchenManager.API.ItemsNS.ItemTemplatesNS;
 using KitchenManager.API.ItemsNS.ItemTemplatesNS.DTO;
-using KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo;
 using KitchenManager.API.ItemsNS.ListItemsNS.DTO;
 using KitchenManager.API.ItemTagsNS;
 using KitchenManager.API.SharedNS.ResponseNS;
 using KitchenManager.API.SharedNS.StatusNS;
 using KitchenManager.API.UserListsNS;
-using KitchenManager.API.UserListsNS.DTO;
-using KitchenManager.API.UsersNS;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -41,11 +38,9 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
     {
         private readonly KMDbContext Context;
         private readonly ILogger<ListItemRepository> LILogger;
-        private readonly IItemTemplateRepository ITRepo;
 
-        public ListItemRepository(IItemTemplateRepository iTRepo, KMDbContext context, ILogger<ListItemRepository> lILogger)
+        public ListItemRepository(KMDbContext context, ILogger<ListItemRepository> lILogger)
         {
-            ITRepo = iTRepo;
             Context = context;
             LILogger = lILogger;
         }
@@ -357,8 +352,8 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                     Description = model.Description,
                     ExpirationDate = model.ExpirationDate ?? DateTime.MaxValue,
                     UserListId = userListResponse.Data.Id,
-                    Icon = await Context.Icons.Where(i => i.Name == model.IconCreateUpdateDTO.Name).FirstOrDefaultAsync() ??
-                            new IconModel() { Name = model.IconCreateUpdateDTO.Name, Path = model.IconCreateUpdateDTO.Path },
+                    Icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync() ??
+                            new IconModel() { Name = model.IconName, Path = model.IconPath },
                     //add pre-existing item tags from model
                     ItemTags = await Context.ItemTags
                             .Where(it => model.ItemTagNames
@@ -494,8 +489,8 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                     Quantity = 1,
                     ExpirationDate = DateTime.UtcNow.AddDays(itemTemplateModel.ExpirationDays.Value).Date,
                     UserListId = userListResponse.Data.Id,
-                    Icon = await Context.Icons.Where(i => i.Name == itemTemplateModel.IconCreateUpdateDTO.Name).FirstOrDefaultAsync() ??
-                            new IconModel() { Name = itemTemplateModel.IconCreateUpdateDTO.Name, Path = itemTemplateModel.IconCreateUpdateDTO.Path },
+                    Icon = await Context.Icons.Where(i => i.Name == itemTemplateModel.IconName).FirstOrDefaultAsync() ??
+                            new IconModel() { Name = itemTemplateModel.IconName, Path = itemTemplateModel.IconPath },
                     //add pre-existing item tags from model
                     ItemTags = await Context.ItemTags
                             .Where(it => itemTemplateModel.ItemTagNames
@@ -584,8 +579,8 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 updatedListItem.Brand = model.Brand ?? updatedListItem.Brand;
                 updatedListItem.Description = model.Description ?? updatedListItem.Description;
                 updatedListItem.ExpirationDate = model.ExpirationDate ?? DateTime.MaxValue;
-                updatedListItem.Icon = await Context.Icons.Where(i => i.Name == model.IconCreateUpdateDTO.Name).FirstOrDefaultAsync() ??
-                        new IconModel() { Name = model.IconCreateUpdateDTO.Name, Path = model.IconCreateUpdateDTO.Path };
+                updatedListItem.Icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync() ??
+                        new IconModel() { Name = model.IconName, Path = model.IconPath };
                 //add pre-existing item tags from model
                 updatedListItem.ItemTags = await Context.ItemTags
                         .Where(it => model.ItemTagNames

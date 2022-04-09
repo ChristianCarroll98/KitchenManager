@@ -1,5 +1,4 @@
-﻿using KitchenManager.API.ItemTagsNS.DTO;
-using KitchenManager.API.ItemTagsNS.Repo;
+﻿using KitchenManager.API.ItemTagsNS.Repo;
 using KitchenManager.API.SharedNS.ResponseNS;
 using KitchenManager.API.SharedNS.StatusNS;
 using Microsoft.AspNetCore.Mvc;

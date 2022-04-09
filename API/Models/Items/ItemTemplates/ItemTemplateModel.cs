@@ -1,8 +1,11 @@
-﻿namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
 {
     public class ItemTemplateModel : ItemModel
     {
-        public int ExpirationDays { get; set; } = -1;
+        [Range(1, int.MaxValue)]
+        public int? ExpirationDays { get; set; }
 
         public ItemTemplateModel()
         {
