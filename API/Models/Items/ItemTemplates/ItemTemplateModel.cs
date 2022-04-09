@@ -1,10 +1,10 @@
 ﻿namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
 {
-    public class ItemTemplate : Item
+    public class ItemTemplateModel : ItemModel
     {
         public int ExpirationDays { get; set; } = -1;
 
-        public ItemTemplate()
+        public ItemTemplateModel()
         {
             Discriminator = "ItemTemplate";
         }

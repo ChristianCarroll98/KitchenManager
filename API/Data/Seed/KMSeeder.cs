@@ -70,7 +70,7 @@ namespace KitchenManager.API.Data.Seed
                     {
                         admin = new User()
                         {
-                            UserName = adminSeedModel.UserName,
+                            //UserName = adminSeedModel.Email,
                             Email = adminSeedModel.Email,
                             NormalizedEmail = adminSeedModel.Email.Normalize()
                         };
@@ -127,7 +127,7 @@ namespace KitchenManager.API.Data.Seed
                     {
                         user = new User()
                         {
-                            UserName = userSeedModel.UserName,
+                            //UserName = userSeedModel.Email,
                             Email = userSeedModel.Email,
                             NormalizedEmail = userSeedModel.Email.Normalize()
                         };
@@ -178,13 +178,13 @@ namespace KitchenManager.API.Data.Seed
             if (!(await Context.ItemTags.AnyAsync()))
             {
                 //Add Item Tags
-                await Context.ItemTags.AddAsync(new ItemTag() { Name = "Fruit", UserCreated = false });
-                await Context.ItemTags.AddAsync(new ItemTag() { Name = "Vegitable", UserCreated = false });
-                await Context.ItemTags.AddAsync(new ItemTag() { Name = "Poultry", UserCreated = false });
-                await Context.ItemTags.AddAsync(new ItemTag() { Name = "Fish", UserCreated = false });
-                await Context.ItemTags.AddAsync(new ItemTag() { Name = "Meat", UserCreated = false });
-                await Context.ItemTags.AddAsync(new ItemTag() { Name = "Leftovers", UserCreated = false });
-                await Context.ItemTags.AddAsync(new ItemTag() { Name = "Spice", UserCreated = false });
+                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Fruit", Pinned = false });
+                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Vegitable", Pinned = false });
+                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Poultry", Pinned = false });
+                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Fish", Pinned = false });
+                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Meat", Pinned = false });
+                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Leftovers", Pinned = false });
+                await Context.ItemTags.AddAsync(new ItemTagModel() { Name = "Spice", Pinned = false });
 
                 await Context.SaveChangesAsync();
             }
@@ -192,13 +192,13 @@ namespace KitchenManager.API.Data.Seed
             if (!(await Context.Icons.AnyAsync()))
             {
                 //Add test Icons
-                await Context.Icons.AddAsync(new Icon() { Name = "Icon1", Path = "Icon1 Path" });
-                await Context.Icons.AddAsync(new Icon() { Name = "Icon2", Path = "Icon2 Path" });
-                await Context.Icons.AddAsync(new Icon() { Name = "Icon3", Path = "Icon3 Path" });
-                await Context.Icons.AddAsync(new Icon() { Name = "Icon4", Path = "Icon4 Path" });
-                await Context.Icons.AddAsync(new Icon() { Name = "Icon5", Path = "Icon5 Path" });
-                await Context.Icons.AddAsync(new Icon() { Name = "Icon6", Path = "Icon6 Path" });
-                await Context.Icons.AddAsync(new Icon() { Name = "Icon7", Path = "Icon7 Path" });
+                await Context.Icons.AddAsync(new IconModel() { Name = "Icon1", Path = "Icon1 Path" });
+                await Context.Icons.AddAsync(new IconModel() { Name = "Icon2", Path = "Icon2 Path" });
+                await Context.Icons.AddAsync(new IconModel() { Name = "Icon3", Path = "Icon3 Path" });
+                await Context.Icons.AddAsync(new IconModel() { Name = "Icon4", Path = "Icon4 Path" });
+                await Context.Icons.AddAsync(new IconModel() { Name = "Icon5", Path = "Icon5 Path" });
+                await Context.Icons.AddAsync(new IconModel() { Name = "Icon6", Path = "Icon6 Path" });
+                await Context.Icons.AddAsync(new IconModel() { Name = "Icon7", Path = "Icon7 Path" });
 
                 await Context.SaveChangesAsync();
             }
@@ -215,7 +215,7 @@ namespace KitchenManager.API.Data.Seed
                     //get random icon
                     var icon = await Context.Icons.Skip(Random.Next(Context.Icons.Count() - 1)).FirstOrDefaultAsync();
 
-                    var itemTemplate = new ItemTemplate()
+                    var itemTemplate = new ItemTemplateModel()
                     {
                         Name = itemTemplateSeedModel.Name,
                         Brand = itemTemplateSeedModel.Brand,
@@ -244,7 +244,7 @@ namespace KitchenManager.API.Data.Seed
                     //get random icon
                     var icon = await Context.Icons.Skip(Random.Next(Context.Icons.Count() - 1)).FirstOrDefaultAsync();
 
-                    var userList = new UserList()
+                    var userList = new UserListModel()
                     {
                         Name = firstName + "'s first list",
                         Description = "A list of random fake ingredient items.",
@@ -259,7 +259,7 @@ namespace KitchenManager.API.Data.Seed
 
                         icon = await Context.Icons.Skip(Random.Next(Context.Icons.Count() - 1)).FirstOrDefaultAsync();
 
-                        userList = new UserList()
+                        userList = new UserListModel()
                         {
                             Name = firstName + "'s second list",
                             Description = "A list of random fake ingredient items.",
@@ -284,7 +284,7 @@ namespace KitchenManager.API.Data.Seed
                         //get random itemTemplate
                         var itemTemplate = await Context.ItemTemplates.Skip(Random.Next(Context.ItemTemplates.Count() - 1)).FirstOrDefaultAsync();
 
-                        var listItem = new ListItem()
+                        var listItem = new ListItemModel()
                         {
                             Name = itemTemplate.Name,
                             Brand = itemTemplate.Brand,
@@ -307,7 +307,7 @@ namespace KitchenManager.API.Data.Seed
             }
 
             //set item tag status to active for each one that was assigned to an item.
-            foreach (ItemTag itemTag in (await Context.ItemTags.Where(it => it.Items.Any()).ToListAsync()))
+            foreach (ItemTagModel itemTag in (await Context.ItemTags.Where(it => it.Items.Any()).ToListAsync()))
             {
                 itemTag.Status = Status.active;
             }

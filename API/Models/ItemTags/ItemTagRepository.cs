@@ -15,13 +15,13 @@ namespace KitchenManager.API.ItemTagsNS.Repo
 {
     public interface IItemTagRepository
     {
-        Task<Response<ItemTagDTO>> RetrieveById(int id);
-        Task<Response<ItemTagDTO>> RetrieveByName(string name);
-        Task<Response<List<ItemTagDTO>>> RetrieveByStatus(Status status);
-        Task<Response<List<ItemTagDTO>>> RetrieveAll();
+        Task<ResponseModel<ItemTagDTO>> RetrieveById(int id);
+        Task<ResponseModel<ItemTagDTO>> RetrieveByName(string name);
+        Task<ResponseModel<List<ItemTagDTO>>> RetrieveByStatus(Status status);
+        Task<ResponseModel<List<ItemTagDTO>>> RetrieveAll();
 
-        Task<Response<ItemTagDTO>> Create(string name); //admin only
-        Task<Response<ItemTagDTO>> Delete(string name); //admin only
+        Task<ResponseModel<ItemTagDTO>> Create(string name); //admin only
+        Task<ResponseModel<ItemTagDTO>> Delete(string name); //admin only
     }
 
     public class ItemTagRepository : IItemTagRepository
@@ -35,9 +35,9 @@ namespace KitchenManager.API.ItemTagsNS.Repo
             ITLogger = iTLogger;
         }
 
-        public async Task<Response<ItemTagDTO>> RetrieveById(int id)
+        public async Task<ResponseModel<ItemTagDTO>> RetrieveById(int id)
         {
-            Response<ItemTagDTO> response = new();
+            ResponseModel<ItemTagDTO> response = new();
 
             try
             {
@@ -69,9 +69,9 @@ namespace KitchenManager.API.ItemTagsNS.Repo
             return response;
         }
 
-        public async Task<Response<ItemTagDTO>> RetrieveByName(string name)
+        public async Task<ResponseModel<ItemTagDTO>> RetrieveByName(string name)
         {
-            Response<ItemTagDTO> response = new();
+            ResponseModel<ItemTagDTO> response = new();
 
             try
             {
@@ -103,9 +103,9 @@ namespace KitchenManager.API.ItemTagsNS.Repo
             return response;
         }
 
-        public async Task<Response<List<ItemTagDTO>>> RetrieveByStatus(Status status)
+        public async Task<ResponseModel<List<ItemTagDTO>>> RetrieveByStatus(Status status)
         {
-            Response<List<ItemTagDTO>> response = new();
+            ResponseModel<List<ItemTagDTO>> response = new();
 
             try
             {
@@ -137,9 +137,9 @@ namespace KitchenManager.API.ItemTagsNS.Repo
             return response;
         }
 
-        public async Task<Response<List<ItemTagDTO>>> RetrieveAll()
+        public async Task<ResponseModel<List<ItemTagDTO>>> RetrieveAll()
         {
-            Response<List<ItemTagDTO>> response = new();
+            ResponseModel<List<ItemTagDTO>> response = new();
 
             try
             {
@@ -170,13 +170,13 @@ namespace KitchenManager.API.ItemTagsNS.Repo
             return response;
         }
 
-        public async Task<Response<ItemTagDTO>> Create(string name)
+        public async Task<ResponseModel<ItemTagDTO>> Create(string name)
         {
-            Response<ItemTagDTO> response = new();
+            ResponseModel<ItemTagDTO> response = new();
 
             try
             {
-                Response<ItemTagDTO> checkPreExisting = await RetrieveByName(name);
+                ResponseModel<ItemTagDTO> checkPreExisting = await RetrieveByName(name);
 
                 if (checkPreExisting.Success)
                 {
@@ -187,16 +187,16 @@ namespace KitchenManager.API.ItemTagsNS.Repo
                     return response;
                 }
 
-                var newItemTag = new ItemTag()
+                var newItemTag = new ItemTagModel()
                 {
                     Name = name,
-                    UserCreated = false
+                    Pinned = false
                 };
 
                 await Context.ItemTags.AddAsync(newItemTag);
                 await Context.SaveChangesAsync();
 
-                Response<ItemTagDTO> checkAdded = await RetrieveByName(name);
+                ResponseModel<ItemTagDTO> checkAdded = await RetrieveByName(name);
 
                 if (!checkAdded.Success)
                 {
@@ -220,13 +220,13 @@ namespace KitchenManager.API.ItemTagsNS.Repo
             return response;
         }
 
-        public async Task<Response<ItemTagDTO>> Delete(string name)
+        public async Task<ResponseModel<ItemTagDTO>> Delete(string name)
         {
-            Response<ItemTagDTO> response = new();
+            ResponseModel<ItemTagDTO> response = new();
 
             try
             {
-                Response<ItemTagDTO> verifyPreExisting = await RetrieveByName(name);
+                ResponseModel<ItemTagDTO> verifyPreExisting = await RetrieveByName(name);
 
                 if (verifyPreExisting.Data == null)
                 {
@@ -245,7 +245,7 @@ namespace KitchenManager.API.ItemTagsNS.Repo
                 Context.ItemTags.Remove(deletedItemTag);
                 await Context.SaveChangesAsync();
 
-                Response<ItemTagDTO> verifyDeleted = await RetrieveById(deletedItemTag.Id);
+                ResponseModel<ItemTagDTO> verifyDeleted = await RetrieveById(deletedItemTag.Id);
 
                 if (verifyDeleted.Success)
                 {

@@ -15,19 +15,19 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
 {
     public interface IItemTemplateRepository
     {
-        Task<Response<ItemTemplateDTO>> RetrieveById(int id);
-        Task<Response<List<ItemTemplateDTO>>> RetrieveByName(string name);
-        Task<Response<List<ItemTemplateDTO>>> RetrieveByBrand(string brand);
-        Task<Response<ItemTemplateDTO>> RetrieveByNameAndBrand(string name, string brand);
-        Task<Response<List<ItemTemplateDTO>>> RetrieveByStatus(Status status);
-        Task<Response<List<ItemTemplateDTO>>> RetrieveByItemTags(List<string> tagNames);
-        Task<Response<List<ItemTemplateDTO>>> RetrieveAll();
+        Task<ResponseModel<ItemTemplateCreateUpdateDTO>> RetrieveById(int id);
+        Task<ResponseModel<List<ItemTemplateCreateUpdateDTO>>> RetrieveByName(string name);
+        Task<ResponseModel<List<ItemTemplateCreateUpdateDTO>>> RetrieveByBrand(string brand);
+        Task<ResponseModel<ItemTemplateCreateUpdateDTO>> RetrieveByNameAndBrand(string name, string brand);
+        Task<ResponseModel<List<ItemTemplateCreateUpdateDTO>>> RetrieveByStatus(Status status);
+        Task<ResponseModel<List<ItemTemplateCreateUpdateDTO>>> RetrieveByItemTags(List<string> tagNames);
+        Task<ResponseModel<List<ItemTemplateCreateUpdateDTO>>> RetrieveAll();
 
-        Task<Response<ItemTemplateDTO>> Create(ItemTemplateDTO model);
-        Task<Response<ItemTemplateDTO>> Update(ItemTemplateDTO model, string originalName, string originalBrand); //admin only
-        Task<Response<ItemTemplateDTO>> SetActiveStatus(string name, string brand); //admin only
-        Task<Response<ItemTemplateDTO>> SetDeletedStatus(string name, string brand); //admin only
-        Task<Response<ItemTemplateDTO>> Delete(string name, string brand); //admin only
+        Task<ResponseModel<ItemTemplateCreateUpdateDTO>> Create(ItemTemplateCreateUpdateDTO model);
+        Task<ResponseModel<ItemTemplateCreateUpdateDTO>> Update(ItemTemplateCreateUpdateDTO model, string originalName, string originalBrand); //admin only
+        Task<ResponseModel<ItemTemplateCreateUpdateDTO>> SetActiveStatus(string name, string brand); //admin only
+        Task<ResponseModel<ItemTemplateCreateUpdateDTO>> SetDeletedStatus(string name, string brand); //admin only
+        Task<ResponseModel<ItemTemplateCreateUpdateDTO>> Delete(string name, string brand); //admin only
     }   
 
     public class ItemTemplateRepository : IItemTemplateRepository
@@ -41,9 +41,9 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             ITLogger = iTLogger;
         }
 
-        public async Task<Response<ItemTemplateDTO>> RetrieveById(int id)
+        public async Task<ResponseModel<ItemTemplateCreateUpdateDTO>> RetrieveById(int id)
         {
-            Response<ItemTemplateDTO> response = new();
+            ResponseModel<ItemTemplateCreateUpdateDTO> response = new();
 
             try
             {
@@ -77,9 +77,9 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             return response;
         }
 
-        public async Task<Response<List<ItemTemplateDTO>>> RetrieveByName(string name)
+        public async Task<ResponseModel<List<ItemTemplateCreateUpdateDTO>>> RetrieveByName(string name)
         {
-            Response<List<ItemTemplateDTO>> response = new();
+            ResponseModel<List<ItemTemplateCreateUpdateDTO>> response = new();
 
             try
             {
@@ -113,9 +113,9 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             return response;
         }
 
-        public async Task<Response<List<ItemTemplateDTO>>> RetrieveByBrand(string brand)
+        public async Task<ResponseModel<List<ItemTemplateCreateUpdateDTO>>> RetrieveByBrand(string brand)
         {
-            Response<List<ItemTemplateDTO>> response = new();
+            ResponseModel<List<ItemTemplateCreateUpdateDTO>> response = new();
 
             try
             {
@@ -149,9 +149,9 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             return response;
         }
 
-        public async Task<Response<ItemTemplateDTO>> RetrieveByNameAndBrand(string name, string brand)
+        public async Task<ResponseModel<ItemTemplateCreateUpdateDTO>> RetrieveByNameAndBrand(string name, string brand)
         {
-            Response<ItemTemplateDTO> response = new();
+            ResponseModel<ItemTemplateCreateUpdateDTO> response = new();
 
             try
             {
@@ -186,13 +186,13 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             return response;
         }
 
-        public async Task<Response<List<ItemTemplateDTO>>> RetrieveByItemTags(List<string> tagNames)
+        public async Task<ResponseModel<List<ItemTemplateCreateUpdateDTO>>> RetrieveByItemTags(List<string> tagNames)
         {
-            Response<List<ItemTemplateDTO>> response = new();
+            ResponseModel<List<ItemTemplateCreateUpdateDTO>> response = new();
 
             try
             {
-                List<ItemTemplate> itemTemplates;
+                List<ItemTemplateModel> itemTemplates;
 
                 if (tagNames.Any())
                 {
@@ -226,7 +226,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                     return response;
                 }
 
-                response.Data = itemTemplates.Select(it => new ItemTemplateDTO(it)).ToList();
+                response.Data = itemTemplates.Select(it => new ItemTemplateCreateUpdateDTO(it)).ToList();
             }
             catch (Exception ex)
             {
@@ -240,9 +240,9 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             return response;
         }
 
-        public async Task<Response<List<ItemTemplateDTO>>> RetrieveByStatus(Status status)
+        public async Task<ResponseModel<List<ItemTemplateCreateUpdateDTO>>> RetrieveByStatus(Status status)
         {
-            Response<List<ItemTemplateDTO>> response = new();
+            ResponseModel<List<ItemTemplateCreateUpdateDTO>> response = new();
 
             try
             {
@@ -275,9 +275,9 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             return response;
         }
 
-        public async Task<Response<List<ItemTemplateDTO>>> RetrieveAll()
+        public async Task<ResponseModel<List<ItemTemplateCreateUpdateDTO>>> RetrieveAll()
         {
-            Response<List<ItemTemplateDTO>> response = new();
+            ResponseModel<List<ItemTemplateCreateUpdateDTO>> response = new();
 
             try
             {
@@ -310,13 +310,13 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             return response;
         }
 
-        public async Task<Response<ItemTemplateDTO>> Create(ItemTemplateDTO model)
+        public async Task<ResponseModel<ItemTemplateCreateUpdateDTO>> Create(ItemTemplateCreateUpdateDTO model)
         {
-            Response<ItemTemplateDTO> response = new();
+            ResponseModel<ItemTemplateCreateUpdateDTO> response = new();
 
             try
             {
-                Response<ItemTemplateDTO> checkPreExisting = await RetrieveByNameAndBrand(model.Name, model.Brand);
+                ResponseModel<ItemTemplateCreateUpdateDTO> checkPreExisting = await RetrieveByNameAndBrand(model.Name, model.Brand);
 
                 if(checkPreExisting.Success)
                 {
@@ -327,7 +327,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                     return response;
                 }
 
-                var newItemTemplate = new ItemTemplate()
+                var newItemTemplate = new ItemTemplateModel()
                 {
                     Name = model.Name,
                     Brand = model.Brand,
@@ -337,7 +337,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
 
                 //sets icon to the pre-existing icon from model in DB if it exists otherwise creates a new one.
                 newItemTemplate.Icon = await Context.Icons.Where(i => i.Name == model.IconDTO.Name).FirstOrDefaultAsync() ??
-                        new Icon() { Name = model.IconDTO.Name, Path = model.IconDTO.Path };
+                        new IconModel() { Name = model.IconDTO.Name, Path = model.IconDTO.Path };
 
                 //add pre-existing item tags from model
                 newItemTemplate.ItemTags.AddRange(await Context.ItemTags
@@ -351,12 +351,12 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                         .Where(itdto => !Context.ItemTags
                                 .Select(it => it.Name)
                                 .Contains(itdto.Name))
-                        .Select(itdto => new ItemTag() { Name = itdto.Name })
+                        .Select(itdto => new ItemTagModel() { Name = itdto.Name })
                         .ToList());
 
                 //make sure inactive tags are set to active when assigned to this item Template.
                 var inactiveTags = newItemTemplate.ItemTags.Where(it => it.Status != Status.active).ToList();
-                foreach (ItemTag itemTag in inactiveTags)
+                foreach (ItemTagModel itemTag in inactiveTags)
                 {
                     itemTag.Status = Status.active;
                 }
@@ -364,7 +364,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 await Context.ItemTemplates.AddAsync(newItemTemplate);
                 await Context.SaveChangesAsync();
 
-                Response<ItemTemplateDTO> checkAdded = await RetrieveByNameAndBrand(model.Name, model.Brand);
+                ResponseModel<ItemTemplateCreateUpdateDTO> checkAdded = await RetrieveByNameAndBrand(model.Name, model.Brand);
 
                 if (!checkAdded.Success)
                 {
@@ -388,13 +388,13 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             return response;
         }
 
-        public async Task<Response<ItemTemplateDTO>> Update(ItemTemplateDTO model, string originalName, string originalBrand)
+        public async Task<ResponseModel<ItemTemplateCreateUpdateDTO>> Update(ItemTemplateCreateUpdateDTO model, string originalName, string originalBrand)
         {
-            Response<ItemTemplateDTO> response = new();
+            ResponseModel<ItemTemplateCreateUpdateDTO> response = new();
 
             try
             {
-                Response<ItemTemplateDTO> verifyPreExisting = await RetrieveByNameAndBrand(originalName, originalBrand);
+                ResponseModel<ItemTemplateCreateUpdateDTO> verifyPreExisting = await RetrieveByNameAndBrand(originalName, originalBrand);
 
                 if (!verifyPreExisting.Success)
                 {
@@ -423,7 +423,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
 
                 //sets icon to the pre-existing icon from model in DB if it exists otherwise creates a new one.
                 updatedItemTemplate.Icon = await Context.Icons.Where(i => i.Name == model.IconDTO.Name).FirstOrDefaultAsync() ?? 
-                        new Icon() { Name = model.IconDTO.Name, Path = model.IconDTO.Path };
+                        new IconModel() { Name = model.IconDTO.Name, Path = model.IconDTO.Path };
 
                 updatedItemTemplate.ItemTags.Clear();
 
@@ -439,12 +439,12 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                         .Where(itdto => !Context.ItemTags
                                 .Select(it => it.Name)
                                 .Contains(itdto.Name))
-                        .Select(itdto => new ItemTag() { Name = itdto.Name })
+                        .Select(itdto => new ItemTagModel() { Name = itdto.Name })
                         .ToList());
 
                 //make sure inactive tags are set to active when assigned to this item Template.
                 var inactiveTags = updatedItemTemplate.ItemTags.Where(it => it.Status != Status.active).ToList();
-                foreach(ItemTag itemTag in inactiveTags)
+                foreach(ItemTagModel itemTag in inactiveTags)
                 {
                     itemTag.Status = Status.active;
                 }
@@ -455,9 +455,9 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 //update item tags' status to inactive if admin created or to deleted if user created
                 //if any were removed from all item templates and list items.
                 var noItemsItemTags = await Context.ItemTags.Where(it => !it.Items.Any()).ToListAsync();
-                foreach(ItemTag itemTag in noItemsItemTags)
+                foreach(ItemTagModel itemTag in noItemsItemTags)
                 {
-                    if (itemTag.UserCreated)
+                    if (itemTag.Pinned)
                     {
                         itemTag.Status = Status.deleted;
                     }
@@ -483,13 +483,13 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             return response;
         }
 
-        public async Task<Response<ItemTemplateDTO>> SetActiveStatus(string name, string brand)
+        public async Task<ResponseModel<ItemTemplateCreateUpdateDTO>> SetActiveStatus(string name, string brand)
         {
-            Response<ItemTemplateDTO> response = new();
+            ResponseModel<ItemTemplateCreateUpdateDTO> response = new();
 
             try
             {
-                Response<ItemTemplateDTO> verifyPreExisting = await RetrieveByNameAndBrand(name, brand);
+                ResponseModel<ItemTemplateCreateUpdateDTO> verifyPreExisting = await RetrieveByNameAndBrand(name, brand);
 
                 if (!verifyPreExisting.Success)
                 {
@@ -527,13 +527,13 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             return response;
         }
 
-        public async Task<Response<ItemTemplateDTO>> SetDeletedStatus(string name, string brand)
+        public async Task<ResponseModel<ItemTemplateCreateUpdateDTO>> SetDeletedStatus(string name, string brand)
         {
-            Response<ItemTemplateDTO> response = new();
+            ResponseModel<ItemTemplateCreateUpdateDTO> response = new();
 
             try
             {
-                Response<ItemTemplateDTO> verifyPreExisting = await RetrieveByNameAndBrand(name, brand);
+                ResponseModel<ItemTemplateCreateUpdateDTO> verifyPreExisting = await RetrieveByNameAndBrand(name, brand);
 
                 if (!verifyPreExisting.Success)
                 {
@@ -571,13 +571,13 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
             return response;
         }
 
-        public async Task<Response<ItemTemplateDTO>> Delete(string name, string brand)
+        public async Task<ResponseModel<ItemTemplateCreateUpdateDTO>> Delete(string name, string brand)
         {
-            Response<ItemTemplateDTO> response = new();
+            ResponseModel<ItemTemplateCreateUpdateDTO> response = new();
 
             try
             {
-                Response<ItemTemplateDTO> verifyPreExisting = await RetrieveByNameAndBrand(name, brand);
+                ResponseModel<ItemTemplateCreateUpdateDTO> verifyPreExisting = await RetrieveByNameAndBrand(name, brand);
 
                 if (!verifyPreExisting.Success)
                 {
@@ -607,7 +607,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 Context.ItemTemplates.Remove(deletedItemTemplate);
                 await Context.SaveChangesAsync();
 
-                Response<ItemTemplateDTO> verifyDeleted = await RetrieveById(deletedItemTemplate.Id);
+                ResponseModel<ItemTemplateCreateUpdateDTO> verifyDeleted = await RetrieveById(deletedItemTemplate.Id);
 
                 if(verifyDeleted.Success){
                     response.Success = false;
@@ -619,9 +619,9 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 //update item tags' status if admin created or delete if user created
                 //if any were removed from all item templates and list items.
                 var noItemsItemTags = await Context.ItemTags.Where(it => !it.Items.Any()).ToListAsync();
-                foreach (ItemTag itemTag in noItemsItemTags)
+                foreach (ItemTagModel itemTag in noItemsItemTags)
                 {
-                    if (itemTag.UserCreated)
+                    if (itemTag.Pinned)
                     {
                         itemTag.Status = Status.deleted;
                     }

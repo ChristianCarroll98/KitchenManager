@@ -29,7 +29,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<Response<ListItemDTO>> RetrieveById(int id)
+        public ActionResult<ResponseModel<ListItemCreateUpdateDTO>> RetrieveById(int id)
         {
             try
             {
@@ -46,7 +46,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<Response<List<ListItemDTO>>> RetrieveByUserListAndBrand(string userName, string userListName, string brand)
+        public ActionResult<ResponseModel<List<ListItemCreateUpdateDTO>>> RetrieveByUserListAndBrand(string userName, string userListName, string brand)
         {
             try
             {
@@ -63,7 +63,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<Response<ListItemDTO>> RetrieveByUserListAndNameAndBrand(string userName, string userListName, string name, string brand)
+        public ActionResult<ResponseModel<ListItemCreateUpdateDTO>> RetrieveByUserListAndNameAndBrand(string userName, string userListName, string name, string brand)
         {
             try
             {
@@ -80,7 +80,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<Response<List<ListItemDTO>>> RetrieveByUserListAndStatus(string userName, string userListName, Status status)
+        public ActionResult<ResponseModel<List<ListItemCreateUpdateDTO>>> RetrieveByUserListAndStatus(string userName, string userListName, Status status)
         {
             try
             {
@@ -97,7 +97,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<Response<ListItemDTO>> RetrieveByUserListAndTags(string userName, string userListName, [FromQuery] List<string> itemTags)
+        public ActionResult<ResponseModel<ListItemCreateUpdateDTO>> RetrieveByUserListAndTags(string userName, string userListName, [FromQuery] List<string> itemTags)
         {
             try
             {
@@ -114,7 +114,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<Response<List<ListItemDTO>>> RetrieveByUserList(string userName, string userListName)
+        public ActionResult<ResponseModel<List<ListItemCreateUpdateDTO>>> RetrieveByUserList(string userName, string userListName)
         {
             try
             {
@@ -129,7 +129,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS
 
         [Route("Create")]
         [HttpPost]
-        public IActionResult Create(string userName, string userListName, ListItemDTO model)
+        public IActionResult Create(string userName, string userListName, ListItemCreateUpdateDTO model)
         {
             try
             {
@@ -144,7 +144,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS
 
         [Route("CreateFromItemTemplate")]
         [HttpPost]
-        public IActionResult CreateFromItemTemplate(string userName, string userListName, ItemTemplateDTO model)
+        public IActionResult CreateFromItemTemplate(string userName, string userListName, ItemTemplateCreateUpdateDTO model)
         {
             try
             {
@@ -159,7 +159,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS
 
         [Route("Update")]
         [HttpPost]
-        public IActionResult Update(string userName, string userListName, string originalName, string originalBrand, ListItemDTO model)
+        public IActionResult Update(string userName, string userListName, string originalName, string originalBrand, ListItemCreateUpdateDTO model)
         {
             try
             {

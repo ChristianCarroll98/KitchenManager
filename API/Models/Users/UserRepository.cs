@@ -9,61 +9,61 @@ namespace KitchenManager.API.UsersNS.Repo
 {
     public interface IUserRepository
     {
-        Task<Response<UserDTO>> RetrieveById(int id);
-        Task<Response<UserDTO>> RetrieveByUserName(string userName);
-        Task<Response<UserDTO>> RetrieveByEmailAddress(string emailAddress);
-        Task<Response<List<UserDTO>>> RetrieveByStatus(Status status); //admin only
+        Task<ResponseModel<UserReadDTO>> RetrieveById(int id);
+        Task<ResponseModel<UserReadDTO>> RetrieveByUserName(string userName);
+        Task<ResponseModel<UserReadDTO>> RetrieveByEmailAddress(string emailAddress);
+        Task<ResponseModel<List<UserReadDTO>>> RetrieveByStatus(Status status); //admin only
 
-        Task<Response<UserDTO>> Update(UserDTO model);
-        Task<Response<UserDTO>> UpdateStatus(UserDTO model);
-        Task<Response<UserDTO>> UpdateEmailAddress(UserDTO model);
-        Task<Response<UserDTO>> Delete(UserDTO model);
-        Task<Response<UserDTO>> ConfirmEmailAddress(UserDTO model);
+        Task<ResponseModel<UserReadDTO>> Update(UserReadDTO model);
+        Task<ResponseModel<UserReadDTO>> UpdateStatus(UserReadDTO model);
+        Task<ResponseModel<UserReadDTO>> UpdateEmailAddress(UserReadDTO model);
+        Task<ResponseModel<UserReadDTO>> Delete(UserReadDTO model);
+        Task<ResponseModel<UserReadDTO>> ConfirmEmailAddress(UserReadDTO model);
     }
 
     public class UserRepository : IUserRepository
     {
-        public Task<Response<UserDTO>> RetrieveById(int id)
+        public Task<ResponseModel<UserReadDTO>> RetrieveById(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Response<UserDTO>> RetrieveByUserName(string userName)
+        public Task<ResponseModel<UserReadDTO>> RetrieveByUserName(string userName)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Response<UserDTO>> RetrieveByEmailAddress(string emailAddress)
+        public Task<ResponseModel<UserReadDTO>> RetrieveByEmailAddress(string emailAddress)
         {
             throw new NotImplementedException();
         }
         
-        public Task<Response<List<UserDTO>>> RetrieveByStatus(Status status)
+        public Task<ResponseModel<List<UserReadDTO>>> RetrieveByStatus(Status status)
         {
             throw new NotImplementedException();
         }
         
-        public Task<Response<UserDTO>> Update(UserDTO model)
+        public Task<ResponseModel<UserReadDTO>> Update(UserReadDTO model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Response<UserDTO>> UpdateStatus(UserDTO model)
+        public Task<ResponseModel<UserReadDTO>> UpdateStatus(UserReadDTO model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Response<UserDTO>> UpdateEmailAddress(UserDTO model)
+        public Task<ResponseModel<UserReadDTO>> UpdateEmailAddress(UserReadDTO model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Response<UserDTO>> Delete(UserDTO model)
+        public Task<ResponseModel<UserReadDTO>> Delete(UserReadDTO model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Response<UserDTO>> ConfirmEmailAddress(UserDTO model)
+        public Task<ResponseModel<UserReadDTO>> ConfirmEmailAddress(UserReadDTO model)
         {
             throw new NotImplementedException();
         }

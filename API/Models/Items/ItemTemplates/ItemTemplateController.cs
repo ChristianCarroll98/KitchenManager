@@ -27,7 +27,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<Response<ItemTemplateDTO>> RetrieveById(int id)
+        public ActionResult<ResponseModel<ItemTemplateCreateUpdateDTO>> RetrieveById(int id)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<Response<ItemTemplateDTO>> RetrieveByName(string name)
+        public ActionResult<ResponseModel<ItemTemplateCreateUpdateDTO>> RetrieveByName(string name)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<Response<ItemTemplateDTO>> RetrieveByBrand(string brand)
+        public ActionResult<ResponseModel<ItemTemplateCreateUpdateDTO>> RetrieveByBrand(string brand)
         {
             try
             {
@@ -78,7 +78,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<Response<ItemTemplateDTO>> RetrieveByNameAndBrand(string name, string brand)
+        public ActionResult<ResponseModel<ItemTemplateCreateUpdateDTO>> RetrieveByNameAndBrand(string name, string brand)
         {
             try
             {
@@ -95,7 +95,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<Response<ItemTemplateDTO>> RetrieveByStatus(Status status)
+        public ActionResult<ResponseModel<ItemTemplateCreateUpdateDTO>> RetrieveByStatus(Status status)
         {
             try
             {
@@ -112,7 +112,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<Response<ItemTemplateDTO>> RetrieveByItemTags([FromQuery]List<string> itemTags)
+        public ActionResult<ResponseModel<ItemTemplateCreateUpdateDTO>> RetrieveByItemTags([FromQuery]List<string> itemTags)
         {
             try
             {
@@ -129,7 +129,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
         [HttpGet()]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public ActionResult<Response<ItemTemplateDTO>> RetrieveAll()
+        public ActionResult<ResponseModel<ItemTemplateCreateUpdateDTO>> RetrieveAll()
         {
             try
             {
@@ -144,7 +144,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
 
         [Route("Create")]
         [HttpPost]
-        public IActionResult Create(ItemTemplateDTO model)
+        public IActionResult Create(ItemTemplateCreateUpdateDTO model)
         {
             try
             {
@@ -159,7 +159,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
 
         [Route("Update")]
         [HttpPost]
-        public IActionResult Update(ItemTemplateDTO model, string originalName = null, string originalBrand = null)
+        public IActionResult Update(ItemTemplateCreateUpdateDTO model, string originalName = null, string originalBrand = null)
         {
             try
             {

@@ -8,6 +8,10 @@ namespace KitchenManager.API.UsersNS
     public class User : IdentityUser<int>
     {
         public Status Status { get; set; }
-        public List<UserList> UserLists { get; set; }
+        public List<UserListModel> UserLists { get; set; }
+
+        public User() : base()
+        {
+        }
     }
 }

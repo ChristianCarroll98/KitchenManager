@@ -9,43 +9,43 @@ namespace KitchenManager.API.UserListsNS.Repo
 {
     public interface IUserListsRepository
     {
-        Task<Response<UserListDTO>> RetrieveById(int id);
-        Task<Response<UserListDTO>> RetrieveByUserAndName(UserDTO user, string name);
-        Task<Response<List<UserListDTO>>> RetrieveByUser(UserDTO user);
+        Task<ResponseModel<UserListReadDTO>> RetrieveById(int id);
+        Task<ResponseModel<UserListReadDTO>> RetrieveByUserAndName(UserReadDTO user, string name);
+        Task<ResponseModel<List<UserListReadDTO>>> RetrieveByUser(UserReadDTO user);
 
-        Task<Response<UserListDTO>> Create(UserListDTO model);
-        Task<Response<UserListDTO>> Update(UserListDTO model);
-        Task<Response<UserListDTO>> Delete(UserListDTO model);
+        Task<ResponseModel<UserListReadDTO>> Create(UserListReadDTO model);
+        Task<ResponseModel<UserListReadDTO>> Update(UserListReadDTO model);
+        Task<ResponseModel<UserListReadDTO>> Delete(UserListReadDTO model);
     }
 
     public class UserListRepository : IUserListsRepository
     {
-        public Task<Response<UserListDTO>> RetrieveById(int id)
+        public Task<ResponseModel<UserListReadDTO>> RetrieveById(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Response<UserListDTO>> RetrieveByUserAndName(UserDTO user, string name)
+        public Task<ResponseModel<UserListReadDTO>> RetrieveByUserAndName(UserReadDTO user, string name)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Response<List<UserListDTO>>> RetrieveByUser(UserDTO user)
+        public Task<ResponseModel<List<UserListReadDTO>>> RetrieveByUser(UserReadDTO user)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Response<UserListDTO>> Create(UserListDTO model)
+        public Task<ResponseModel<UserListReadDTO>> Create(UserListReadDTO model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Response<UserListDTO>> Update(UserListDTO model)
+        public Task<ResponseModel<UserListReadDTO>> Update(UserListReadDTO model)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Response<UserListDTO>> Delete(UserListDTO model)
+        public Task<ResponseModel<UserListReadDTO>> Delete(UserListReadDTO model)
         {
             throw new NotImplementedException();
         }
