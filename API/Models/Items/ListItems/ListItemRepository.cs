@@ -2,14 +2,11 @@
 using KitchenManager.API.IconsNS;
 using KitchenManager.API.ItemsNS.ItemTemplatesNS;
 using KitchenManager.API.ItemsNS.ItemTemplatesNS.DTO;
-using KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo;
 using KitchenManager.API.ItemsNS.ListItemsNS.DTO;
 using KitchenManager.API.ItemTagsNS;
 using KitchenManager.API.SharedNS.ResponseNS;
 using KitchenManager.API.SharedNS.StatusNS;
 using KitchenManager.API.UserListsNS;
-using KitchenManager.API.UserListsNS.DTO;
-using KitchenManager.API.UsersNS;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
@@ -21,48 +18,43 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 {
     public interface IListItemRepository
     {
-        Task<Response<ListItemDTO>> RetrieveById(int id);
-        Task<Response<List<ListItemDTO>>> RetrieveByUserListAndBrand(string userName, string userListName, string brand);
-        Task<Response<ListItemDTO>> RetrieveByUserListAndNameAndBrand(string userName, string userListName, string name, string brand);
-        Task<Response<List<ListItemDTO>>> RetrieveByUserListAndStatus(string userName, string userListName, Status status);
-        Task<Response<List<ListItemDTO>>> RetrieveByUserListAndTags(string userName, string userListName, List<string> tagNames);
-        Task<Response<List<ListItemDTO>>> RetrieveByUserList(string userName, string userListName);
+        Task<ResponseModel<ListItemReadDTO>> RetrieveById(int id);
+        Task<ResponseModel<List<ListItemReadDTO>>> RetrieveByUserListAndBrand(string userEmail, string userListName, string brand);
+        Task<ResponseModel<ListItemReadDTO>> RetrieveByUserListAndNameAndBrand(string userEmail, string userListName, string name, string brand);
+        Task<ResponseModel<List<ListItemReadDTO>>> RetrieveByUserListAndStatus(string userEmail, string userListName, Status status);
+        Task<ResponseModel<List<ListItemReadDTO>>> RetrieveByUserListAndTags(string userEmail, string userListName, List<string> tagNames);
+        Task<ResponseModel<List<ListItemReadDTO>>> RetrieveByUserList(string userEmail, string userListName);
 
-        Task<Response<ListItemDTO>> Create(string userName, string userListName, ListItemDTO model);
-        Task<Response<ListItemDTO>> CreateFromItemTemplate(string userName, string userListName, ItemTemplateDTO model);
-        Task<Response<ListItemDTO>> Update(string userName, string userListName, string originalName, string originalBrand, ListItemDTO model);
-        Task<Response<ListItemDTO>> SetQuantity(string userName, string userListName, string name, string brand, int quantity);
-        Task<Response<ListItemDTO>> SetActiveStatus(string userName, string userListName, string name, string brand);
-        Task<Response<ListItemDTO>> SetDeletedStatus(string userName, string userListName, string name, string brand);
-        Task<Response<ListItemDTO>> Delete(string userName, string userListName, string name, string brand);
+        Task<ResponseModel<ListItemReadDTO>> Create(string userEmail, string userListName, ListItemCreateUpdateDTO model);
+        Task<ResponseModel<ListItemReadDTO>> CreateFromItemTemplate(string userEmail, string userListName, ItemTemplateCreateUpdateDTO model);
+        Task<ResponseModel<ListItemReadDTO>> Update(string userEmail, string userListName, string originalName, string originalBrand, ListItemCreateUpdateDTO model);
+        Task<ResponseModel<ListItemReadDTO>> SetQuantity(string userEmail, string userListName, string name, string brand, int quantity);
+        Task<ResponseModel<ListItemReadDTO>> SetActiveStatus(string userEmail, string userListName, string name, string brand);
+        Task<ResponseModel<ListItemReadDTO>> SetDeletedStatus(string userEmail, string userListName, string name, string brand);
+        Task<ResponseModel<ListItemReadDTO>> Delete(string userEmail, string userListName, string name, string brand);
     }
 
     public class ListItemRepository : IListItemRepository
     {
         private readonly KMDbContext Context;
         private readonly ILogger<ListItemRepository> LILogger;
-        private readonly IItemTemplateRepository ITRepo;
 
-        public ListItemRepository(IItemTemplateRepository iTRepo, KMDbContext context, ILogger<ListItemRepository> lILogger)
+        public ListItemRepository(KMDbContext context, ILogger<ListItemRepository> lILogger)
         {
-            ITRepo = iTRepo;
             Context = context;
             LILogger = lILogger;
         }
 
-        public async Task<Response<ListItemDTO>> RetrieveById(int id)
+        public async Task<ResponseModel<ListItemReadDTO>> RetrieveById(int id)
         {
-            Response<ListItemDTO> response = new();
+            ResponseModel<ListItemReadDTO> response = new();
 
             try
-            {   
+            {
                 var listItem = await Context
                         .ListItems
                         .Include(li => li.ItemTags)
                         .Include(li => li.Icon)
-                        ///TODO \/
-                        //.Include(li => li.UserList).ThenInclude(ul => ul.Name).ThenInclude(u => u.UserName) 
-                        //.Include(li => li.UserList).ThenInclude(ul => ul.Name)
                         .Where(li => li.Id == id)
                         .FirstOrDefaultAsync();
 
@@ -74,7 +66,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                     return response;
                 }
 
-                response.Data = new ListItemDTO(listItem);
+                response.Data = new ListItemReadDTO(listItem);
             }
 
             catch (Exception ex)
@@ -89,18 +81,26 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             return response;
         }
 
-        public async Task<Response<List<ListItemDTO>>> RetrieveByUserListAndBrand(string userName, string userListName, string brand)
+        public async Task<ResponseModel<List<ListItemReadDTO>>> RetrieveByUserListAndBrand(string userEmail, string userListName, string brand)
         {
-            Response<List<ListItemDTO>> response = new();
+            ResponseModel<List<ListItemReadDTO>> response = new();
 
             try
             {
+                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+                
+                if (!userListResponse.Success)
+                {
+                    response.Success = false;
+                    response.Message = userListResponse.Message;
+                    return response;
+                }
+
                 var listItems = await Context
                         .ListItems
                         .Include(li => li.ItemTags)
                         .Include(li => li.Icon)
-                        .Where(li => li.UserList.User.UserName == userName &&
-                                li.UserList.Name == userListName &&
+                        .Where(li => li.UserListId == userListResponse.Data.Id &&
                                 li.Brand == brand &&
                                 li.Status == Status.active)
                         .ToListAsync();
@@ -109,18 +109,18 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 {
                     response.Success = false;
                     response.Message = $"Could not find any List Items with Brand: {brand}";
-                    LILogger.LogError($"Could not find any Items on {userName}'s list: {userListName} with Brand: {brand}");
+                    LILogger.LogError($"Could not find any Items on list of User with Email: {userEmail} named: {userListName} with Brand: {brand}");
                     return response;
                 }
 
-                response.Data = listItems.Select(li => new ListItemDTO(li)).ToList();
+                response.Data = listItems.Select(li => new ListItemReadDTO(li)).ToList();
             }
 
             catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = $"An error occured while attempting to find List Items with Brand: {brand}.";
-                LILogger.LogError($"An error occured while attempting to find Items on {userName}'s list: {userListName} with Brand: {brand}. Message: {ex.Message}");
+                LILogger.LogError($"An error occured while attempting to find Items on list of User with Email: {userEmail} named: {userListName} with Brand: {brand}. Message: {ex.Message}");
                 return response;
             }
 
@@ -128,38 +128,47 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             return response;
         }
 
-        public async Task<Response<ListItemDTO>> RetrieveByUserListAndNameAndBrand(string userName, string userListName, string name, string brand)
+        public async Task<ResponseModel<ListItemReadDTO>> RetrieveByUserListAndNameAndBrand(string userEmail, string userListName, string name, string brand)
         {
-            Response<ListItemDTO> response = new();
+            ResponseModel<ListItemReadDTO> response = new();
 
             try
             {
+                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+
+                if (!userListResponse.Success)
+                {
+                    response.Success = false;
+                    response.Message = userListResponse.Message;
+                    return response;
+                }
+
                 var listItem = await Context
                         .ListItems
                         .Include(li => li.ItemTags)
                         .Include(li => li.Icon)
-                        .Where(li => li.UserList.User.UserName == userName &&
-                                li.UserList.Name == userListName &&
+                        .Where(li => li.UserListId == userListResponse.Data.Id &&
                                 li.Name == name &&
-                                li.Brand == brand)
+                                li.Brand == brand &&
+                                li.Status == Status.active)
                         .FirstOrDefaultAsync();
 
                 if (listItem == null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find List Item with Name: {name} and Brand: {brand}.";
-                    LILogger.LogError($"Could not find List Item with Name: {name} and Brand: {brand} on {userName}'s list: {userListName}.");
+                    LILogger.LogError($"Could not find List Item with Name: {name} and Brand: {brand} on {userEmail}'s list: {userListName}.");
                     return response;
                 }
 
-                response.Data = new ListItemDTO(listItem);
+                response.Data = new ListItemReadDTO(listItem);
             }
 
             catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = $"An error occured while attempting to find List Item with Name: {name} and Brand: {brand}.";
-                LILogger.LogError($"An error occured while attempting to find List Item with Name: {name} and Brand: {brand} for User: {userName}. Message: {ex.Message}");
+                LILogger.LogError($"An error occured while attempting to find List Item with Name: {name} and Brand: {brand} for User: {userEmail}. Message: {ex.Message}");
                 return response;
             }
 
@@ -167,18 +176,26 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             return response;
         }
 
-        public async Task<Response<List<ListItemDTO>>> RetrieveByUserListAndStatus(string userName, string userListName, Status status)
+        public async Task<ResponseModel<List<ListItemReadDTO>>> RetrieveByUserListAndStatus(string userEmail, string userListName, Status status)
         {
-            Response<List<ListItemDTO>> response = new();
+            ResponseModel<List<ListItemReadDTO>> response = new();
 
             try
             {
+                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+
+                if (!userListResponse.Success)
+                {
+                    response.Success = false;
+                    response.Message = userListResponse.Message;
+                    return response;
+                }
+
                 var listItems = await Context
                         .ListItems
                         .Include(li => li.ItemTags)
                         .Include(li => li.Icon)
-                        .Where(li => li.UserList.User.UserName == userName &&
-                                li.UserList.Name == userListName &&
+                        .Where(li => li.UserListId == userListResponse.Data.Id &&
                                 li.Status == status)
                         .ToListAsync();
 
@@ -186,18 +203,18 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 {
                     response.Success = false;
                     response.Message = $"Could not find any List Items with the specified status.";
-                    LILogger.LogError($"Could not find any Items on {userName}'s list: {userListName} with status: {status}.");
+                    LILogger.LogError($"Could not find any Items on list of User with Email: {userEmail} named: {userListName} with status: {status}.");
                     return response;
                 }
 
-                response.Data = listItems.Select(li => new ListItemDTO(li)).ToList();
+                response.Data = listItems.Select(li => new ListItemReadDTO(li)).ToList();
             }
 
             catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = $"An error occured while attempting to find List Items with the specified status.";
-                LILogger.LogError($"An error occured while attempting to find Items on {userName}'s list: {userListName} with status: {status}. Message: {ex.Message}");
+                LILogger.LogError($"An error occured while attempting to find Items on list of User with Email: {userEmail} named: {userListName} with status: {status}. Message: {ex.Message}");
                 return response;
             }
 
@@ -205,57 +222,50 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             return response;
         }
 
-        public async Task<Response<List<ListItemDTO>>> RetrieveByUserListAndTags(string userName, string userListName, List<string> tagNames)
+        public async Task<ResponseModel<List<ListItemReadDTO>>> RetrieveByUserListAndTags(string userEmail, string userListName, List<string> tagNames)
         {
-            Response<List<ListItemDTO>> response = new();
+            ResponseModel<List<ListItemReadDTO>> response = new();
 
             try
             {
-                List<ListItem> listItems;
+                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
 
-                if (tagNames.Any())
+                if (!userListResponse.Success)
                 {
-                    listItems = await Context
-                            .ListItems
-                            .Include(li => li.ItemTags)
-                            .Include(li => li.Icon)
-                            .Where(li => li.UserList.User.UserName == userName &&
-                                    li.UserList.Name == userListName &&
-                                    li.ItemTags
-                                            .Select(it => it.Name)
-                                            .Any(itn => tagNames
-                                                    .Contains(itn)) &&
-                                    li.Status == Status.active)
-                            .ToListAsync();
+                    response.Success = false;
+                    response.Message = userListResponse.Message;
+                    return response;
                 }
-                else
-                {
-                    listItems = await Context
-                            .ListItems
-                            .Include(li => li.ItemTags)
-                            .Include(li => li.Icon)
-                            .Where(li => li.UserList.User.UserName == userName &&
-                                    li.UserList.Name == userListName &&
-                                    !li.ItemTags.Any() &&
-                                    li.Status == Status.active)
-                            .ToListAsync();
-                }
+
+                var listItems = await Context
+                        .ListItems
+                        .Include(li => li.ItemTags)
+                        .Include(li => li.Icon)
+                        .Where(li => li.UserListId == userListResponse.Data.Id &&
+                                (tagNames.Any() ?
+                                        li.ItemTags
+                                                .Select(it => it.Name)
+                                                .Any(itn => tagNames
+                                                        .Contains(itn)) :
+                                        !li.ItemTags.Any()) &&
+                                li.Status == Status.active)
+                        .ToListAsync();
 
                 if (!listItems.Any())
                 {
                     response.Success = false;
                     response.Message = $"Could not find any List Items with tags: {string.Join(", ", tagNames)}.";
-                    LILogger.LogError($"Could not find any List Items on {userName}'s list: {userListName} with tags: {string.Join(", ", tagNames)}");
+                    LILogger.LogError($"Could not find any List Items on list of User with Email: {userEmail} named: {userListName} with tags: {string.Join(", ", tagNames)}");
                     return response;
                 }
 
-                response.Data = listItems.Select(it => new ListItemDTO(it)).ToList();
+                response.Data = listItems.Select(it => new ListItemReadDTO(it)).ToList();
             }
             catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = $"An error occured while attempting to find List Items with tags: {string.Join(", ", tagNames)}.";
-                LILogger.LogError($"An error occured while attempting to find List Items on {userName}'s list: {userListName} with tags: {string.Join(", ", tagNames)}. Message: {ex.Message}");
+                LILogger.LogError($"An error occured while attempting to find List Items on list of User with Email: {userEmail} named: {userListName} with tags: {string.Join(", ", tagNames)}. Message: {ex.Message}");
                 return response;
             }
 
@@ -263,18 +273,26 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             return response;
         }
 
-        public async Task<Response<List<ListItemDTO>>> RetrieveByUserList(string userName, string userListName)
+        public async Task<ResponseModel<List<ListItemReadDTO>>> RetrieveByUserList(string userEmail, string userListName)
         {
-            Response<List<ListItemDTO>> response = new();
+            ResponseModel<List<ListItemReadDTO>> response = new();
 
             try
             {
+                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+
+                if (!userListResponse.Success)
+                {
+                    response.Success = false;
+                    response.Message = userListResponse.Message;
+                    return response;
+                }
+
                 var listItems = await Context
                         .ListItems
                         .Include(li => li.ItemTags)
                         .Include(li => li.Icon)
-                        .Where(li => li.UserList.User.UserName == userName &&
-                                li.UserList.Name == userListName &&
+                        .Where(li => li.UserListId == userListResponse.Data.Id &&
                                 li.Status == Status.active)
                         .ToListAsync();
 
@@ -282,18 +300,18 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 {
                     response.Success = false;
                     response.Message = $"Could not find any List Items.";
-                    LILogger.LogError($"Could not find any Items on {userName}'s list: {userListName}.");
+                    LILogger.LogError($"Could not find any Items on list of User with Email: {userEmail} named: {userListName}.");
                     return response;
                 }
 
-                response.Data = listItems.Select(li => new ListItemDTO(li)).ToList();
+                response.Data = listItems.Select(li => new ListItemReadDTO(li)).ToList();
             }
 
             catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = $"An error occured while attempting to find List Items.";
-                LILogger.LogError($"An error occured while attempting to find Items on {userName}'s list: {userListName}. Message: {ex.Message}");
+                LILogger.LogError($"An error occured while attempting to find Items on list of User with Email: {userEmail} named: {userListName}. Message: {ex.Message}");
                 return response;
             }
 
@@ -301,101 +319,109 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             return response;
         }
 
-        public async Task<Response<ListItemDTO>> Create(string userName, string userListName, ListItemDTO model)
+        public async Task<ResponseModel<ListItemReadDTO>> Create(string userEmail, string userListName, ListItemCreateUpdateDTO model)
         {
-            Response<ListItemDTO> response = new();
+            ResponseModel<ListItemReadDTO> response = new();
 
             try
             {
-                UserList userList = await Context.UserLists.Where(ul => ul.User.UserName == userName && ul.Name == userListName).FirstOrDefaultAsync();
+                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
 
-                if (userList == null)
+                if (!userListResponse.Success)
                 {
                     response.Success = false;
-                    response.Message = $"Could not find specified User List.";
-                    LILogger.LogError($"User {userName} has no list: {userListName}.");
+                    response.Message = userListResponse.Message;
                     return response;
                 }
 
-                Response<ItemTemplateDTO> itemTemplateCheck = ITRepo.RetrieveByNameAndBrand(model.Name, model.Brand).Result;
-
-                if (itemTemplateCheck.Success)
-                {
-                    LILogger.LogInformation($"There is an Item Template with Name: {model.Name} and Brand: {model.Brand} already. Redirecting to CreateFromItemTemplate method.");
-                    return CreateFromItemTemplate(userName, userListName, itemTemplateCheck.Data).Result;
-                }
-
-                Response<ListItemDTO> checkPreExisting = await RetrieveByUserListAndNameAndBrand(userName, userListName, model.Name, model.Brand);
+                ResponseModel<ListItemReadDTO> checkPreExisting = await RetrieveByUserListAndNameAndBrand(userEmail, userListName, model.Name, model.Brand);
 
                 if (checkPreExisting.Success)
                 {
                     response.Success = false;
                     response.Message = $"A List Item already exists in this list with Name: {model.Name} and Brand: {model.Brand}. Message: {checkPreExisting.Message}";
                     response.Data = checkPreExisting.Data;
-                    LILogger.LogError($"A List Item already exists in {userName}'s list: {userListName} with Name: {model.Name} and Brand: {model.Brand}. Message: {checkPreExisting.Message}");
+                    LILogger.LogError($"A List Item already exists on list of User with Email: {userEmail} named: {userListName} with Name: {model.Name} and Brand: {model.Brand}. Message: {checkPreExisting.Message}");
                     return response;
                 }
 
-                var newListItem = new ListItem()
+                var newListItem = new ListItemModel()
                 {
                     Name = model.Name,
                     Brand = model.Brand,
                     Description = model.Description,
-                    ExpirationDate = model.ExpirationDate,
-                    Quantity = model.Quantity,
-                    UserList = userList
+                    ExpirationDate = model.ExpirationDate ?? DateTime.MaxValue,
+                    UserListId = userListResponse.Data.Id,
+                    Icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync() ??
+                            new IconModel() { Name = model.IconName, Path = model.IconPath },
+                    //add pre-existing item tags from model
+                    ItemTags = await Context.ItemTags
+                            .Where(it => model.ItemTagNames
+                                    .Contains(it.Name))
+                        .Concat(
+                        //add new item tags from model
+                        model.ItemTagNames
+                                .Where(itname => !Context.ItemTags
+                                        .Select(it => it.Name)
+                                        .Contains(itname))
+                                .Select(itname => new ItemTagModel() { Name = itname }))
+                        .ToListAsync()
                 };
-
-                //sets icon to the pre-existing icon from model in DB if it exists otherwise creates a new one.
-                newListItem.Icon = await Context.Icons.Where(i => i.Name == model.IconDTO.Name).FirstOrDefaultAsync() ??
-                        new Icon() { Name = model.IconDTO.Name, Path = model.IconDTO.Path };
-
-                //add pre-existing item tags from model
-                newListItem.ItemTags.AddRange(await Context.ItemTags
-                        .Where(it => model.ItemTagDTOs
-                                .Select(itdto => itdto.Name)
-                                .Contains(it.Name))
-                        .ToListAsync());
-
-                //add new item tags from model
-                newListItem.ItemTags.AddRange(model.ItemTagDTOs
-                        .Where(itdto => !Context.ItemTags
-                                .Select(it => it.Name)
-                                .Contains(itdto.Name))
-                        .Select(itdto => new ItemTag() { Name = itdto.Name })
-                        .ToList());
 
                 //make sure inactive tags are set to active when assigned to this list item.
                 var inactiveTags = newListItem.ItemTags.Where(it => it.Status != Status.active).ToList();
-                foreach (ItemTag itemTag in inactiveTags)
+                foreach (ItemTagModel itemTag in inactiveTags)
                 {
                     itemTag.Status = Status.active;
                 }
-
-                //create item template from item since it was not previously a template.
-                var newItemTemplate = new ItemTemplate()
-                {
-                    Name = newListItem.Name,
-                    Brand = newListItem.Brand,
-                    Description = newListItem.Description,
-                    ExpirationDays = (newListItem.ExpirationDate - DateTime.UtcNow).Days,
-                    Status = Status.inactive, //waiting to be edited/approved by an admin
-                    Icon = newListItem.Icon,
-                    ItemTags = newListItem.ItemTags
-                };
-
-                await Context.ItemTemplates.AddAsync(newItemTemplate);
+                
                 await Context.ListItems.AddAsync(newListItem);
                 await Context.SaveChangesAsync();
 
-                Response<ListItemDTO> checkAdded = await RetrieveByUserListAndNameAndBrand(userName, userListName, model.Name, model.Brand);
+                ResponseModel<ListItemReadDTO> checkAdded = await RetrieveByUserListAndNameAndBrand(userEmail, userListName, model.Name, model.Brand);
 
                 if (!checkAdded.Success)
                 {
                     response.Success = false;
                     response.Message = $"Failed to save the new List Item. Message: {checkAdded.Message}";
-                    LILogger.LogError($"Failed to add new List Item to Database in {userName}'s list: {userListName}. Message: {checkAdded.Message}");
+                    LILogger.LogError($"Failed to add new List Item to Database in list of User with Email: {userEmail} with name: {userListName}. Message: {checkAdded.Message}");
                     return response;
+                }
+
+                var checkItemTemplate = await Context.ItemTemplates
+                        .Where(it => it.Name == model.Name &&
+                                it.Brand == model.Brand)
+                        .FirstOrDefaultAsync();
+
+                if (checkItemTemplate == null)
+                {
+                    //create item template from item since it was not previously a template.
+                    var newItemTemplate = new ItemTemplateModel()
+                    {
+                        Name = newListItem.Name,
+                        Brand = newListItem.Brand,
+                        Description = newListItem.Description,
+                        ExpirationDays = (newListItem.ExpirationDate - DateTime.UtcNow).Days,
+                        Status = Status.inactive, //waiting to be edited/approved by an admin
+                        Icon = newListItem.Icon,
+                        ItemTags = newListItem.ItemTags
+                    };
+
+                    await Context.ItemTemplates.AddAsync(newItemTemplate);
+                    await Context.SaveChangesAsync();
+
+                    checkItemTemplate = await Context.ItemTemplates
+                        .Where(it => it.Name == model.Name &&
+                                it.Brand == model.Brand)
+                        .FirstOrDefaultAsync();
+
+                    if (checkItemTemplate == null)
+                    {
+                        response.Success = false;
+                        response.Message = $"Failed to save the new Item Template from List Item. Message: {checkAdded.Message}";
+                        LILogger.LogError($"Failed to add new Item Template from List Item to Database in list of User with Email: {userEmail} with name: {userListName}. Message: {checkAdded.Message}");
+                        return response;
+                    }
                 }
 
                 response.Data = checkAdded.Data;
@@ -412,76 +438,76 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             return response;
         }
 
-        public async Task<Response<ListItemDTO>> CreateFromItemTemplate(string userName, string userListName, ItemTemplateDTO itemTemplateModel)
+        public async Task<ResponseModel<ListItemReadDTO>> CreateFromItemTemplate(string userEmail, string userListName, ItemTemplateCreateUpdateDTO itemTemplateModel)
         {
-            Response<ListItemDTO> response = new();
+            ResponseModel<ListItemReadDTO> response = new();
 
             try
             {
-                UserList userList = await Context.UserLists.Where(ul => ul.User.UserName == userName && ul.Name == userListName).FirstOrDefaultAsync();
+                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
 
-                if (userList == null)
+                if (!userListResponse.Success)
                 {
                     response.Success = false;
-                    response.Message = $"Could not find specified User List.";
-                    LILogger.LogError($"User {userName} has no list: {userListName}.");
+                    response.Message = userListResponse.Message;
                     return response;
                 }
 
-                Response<ListItemDTO> checkPreExisting = await RetrieveByUserListAndNameAndBrand(userName, userListName, itemTemplateModel.Name, itemTemplateModel.Brand);
+                ResponseModel<ListItemReadDTO> checkPreExisting = await RetrieveByUserListAndNameAndBrand(userEmail, userListName, itemTemplateModel.Name, itemTemplateModel.Brand);
 
                 if (checkPreExisting.Success)
                 {
                     response.Success = false;
                     response.Message = $"A List Item already exists in this list with Name: {itemTemplateModel.Name} and Brand: {itemTemplateModel.Brand}. Message: {checkPreExisting.Message}";
                     response.Data = checkPreExisting.Data;
-                    LILogger.LogError($"A List Item already exists in {userName}'s list: {userListName} with Name: {itemTemplateModel.Name} and Brand: {itemTemplateModel.Brand}. Message: {checkPreExisting.Message}");
+                    LILogger.LogError($"A List Item already exists in list of User with Email: {userEmail} with name: {userListName} with Name: {itemTemplateModel.Name} and Brand: {itemTemplateModel.Brand}. Message: {checkPreExisting.Message}");
                     return response;
                 }
 
-                Response<ItemTemplateDTO> checkItemTemplatePreExisting = await ITRepo.RetrieveByNameAndBrand(itemTemplateModel.Name, itemTemplateModel.Brand);
+                //check if there is an item template.
+                var itemTemplate = await Context.ItemTemplates
+                        .Include(it => it.ItemTags)
+                        .Include(it => it.Icon)
+                        .Where(it => it.Name == itemTemplateModel.Name &&
+                                it.Brand == itemTemplateModel.Brand)
+                        .FirstOrDefaultAsync();
 
-                if (!checkItemTemplatePreExisting.Success)
+                if (itemTemplate == null)
                 {
                     response.Success = false;
-                    response.Message = $"No Item Template with Name: {itemTemplateModel.Name} and Brand: {itemTemplateModel.Brand} exists. Message: {checkPreExisting.Message}";
+                    response.Message = $"No Item Template with Name: {itemTemplateModel.Name} and Brand: {itemTemplateModel.Brand} exists.";
                     response.Data = checkPreExisting.Data;
                     LILogger.LogError($"No Item Template with Name: {itemTemplateModel.Name} and Brand: {itemTemplateModel.Brand} exists.");
                     return response;
                 }
 
-                var newListItem = new ListItem()
+                var newListItem = new ListItemModel()
                 {
                     Name = itemTemplateModel.Name,
                     Brand = itemTemplateModel.Brand,
                     Description = itemTemplateModel.Description,
                     Quantity = 1,
-                    ExpirationDate = DateTime.UtcNow.AddDays(itemTemplateModel.ExpirationDays).Date,
-                    UserList = userList
+                    ExpirationDate = DateTime.UtcNow.AddDays(itemTemplateModel.ExpirationDays.Value).Date,
+                    UserListId = userListResponse.Data.Id,
+                    Icon = await Context.Icons.Where(i => i.Name == itemTemplateModel.IconName).FirstOrDefaultAsync() ??
+                            new IconModel() { Name = itemTemplateModel.IconName, Path = itemTemplateModel.IconPath },
+                    //add pre-existing item tags from model
+                    ItemTags = await Context.ItemTags
+                            .Where(it => itemTemplateModel.ItemTagNames
+                                    .Contains(it.Name))
+                        .Concat(
+                        //add new item tags from model
+                        itemTemplateModel.ItemTagNames
+                                .Where(itname => !Context.ItemTags
+                                        .Select(it => it.Name)
+                                        .Contains(itname))
+                                .Select(itname => new ItemTagModel() { Name = itname }))
+                        .ToListAsync()
                 };
-
-                //sets icon to the pre-existing icon from model in DB if it exists otherwise creates a new one.
-                newListItem.Icon = await Context.Icons.Where(i => i.Name == itemTemplateModel.IconDTO.Name).FirstOrDefaultAsync() ??
-                        new Icon() { Name = itemTemplateModel.IconDTO.Name, Path = itemTemplateModel.IconDTO.Path };
-
-                //add pre-existing item tags from model
-                newListItem.ItemTags.AddRange(await Context.ItemTags
-                        .Where(it => itemTemplateModel.ItemTagDTOs
-                                .Select(itdto => itdto.Name)
-                                .Contains(it.Name))
-                        .ToListAsync());
-
-                //add new item tags from model
-                newListItem.ItemTags.AddRange(itemTemplateModel.ItemTagDTOs
-                        .Where(itdto => !Context.ItemTags
-                                .Select(it => it.Name)
-                                .Contains(itdto.Name))
-                        .Select(itdto => new ItemTag() { Name = itdto.Name })
-                        .ToList());
 
                 //make sure inactive tags are set to active when assigned to this list item.
                 var inactiveTags = newListItem.ItemTags.Where(it => it.Status != Status.active).ToList();
-                foreach (ItemTag itemTag in inactiveTags)
+                foreach (ItemTagModel itemTag in inactiveTags)
                 {
                     itemTag.Status = Status.active;
                 }
@@ -489,13 +515,13 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 await Context.ListItems.AddAsync(newListItem);
                 await Context.SaveChangesAsync();
 
-                Response<ListItemDTO> checkAdded = await RetrieveByUserListAndNameAndBrand(userName, userListName, itemTemplateModel.Name, itemTemplateModel.Brand);
+                ResponseModel<ListItemReadDTO> checkAdded = await RetrieveByUserListAndNameAndBrand(userEmail, userListName, itemTemplateModel.Name, itemTemplateModel.Brand);
 
                 if (!checkAdded.Success)
                 {
                     response.Success = false;
                     response.Message = $"Failed to add the new List Item from Template. Message: {checkAdded.Message}";
-                    LILogger.LogError($"Failed to add new List Item from Template to Database in {userName}'s list: {userListName}. Message: {checkAdded.Message}");
+                    LILogger.LogError($"Failed to add new List Item from Template to Database in list of User with Email: {userEmail} with name: {userListName}. Message: {checkAdded.Message}");
                     return response;
                 }
 
@@ -513,19 +539,28 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             return response;
         }
 
-        public async Task<Response<ListItemDTO>> Update(string userName, string userListName, string originalName, string originalBrand, ListItemDTO model)
+        public async Task<ResponseModel<ListItemReadDTO>> Update(string userEmail, string userListName, string originalName, string originalBrand, ListItemCreateUpdateDTO model)
         {
-            Response<ListItemDTO> response = new();
+            ResponseModel<ListItemReadDTO> response = new();
 
             try
             {
-                Response<ListItemDTO> verifyPreExisting = await RetrieveByUserListAndNameAndBrand(userName, userListName, originalName, originalBrand);
+                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+
+                if (!userListResponse.Success)
+                {
+                    response.Success = false;
+                    response.Message = userListResponse.Message;
+                    return response;
+                }
+
+                ResponseModel<ListItemReadDTO> verifyPreExisting = await RetrieveByUserListAndNameAndBrand(userEmail, userListName, originalName, originalBrand);
 
                 if (!verifyPreExisting.Success)
                 {
                     response.Success = false;
                     response.Message = $"Failed to find the specified List Item to update. Message: {verifyPreExisting.Message}";
-                    LILogger.LogError($"Failed to find List Item in {userName}'s list: {userListName} with original Name: {originalName} and original Brand: {originalBrand} to update. Message: {verifyPreExisting.Message}");
+                    LILogger.LogError($"Failed to find List Item in list of User with Email: {userEmail} with name: {userListName} with original Name: {originalName} and original Brand: {originalBrand} to update. Message: {verifyPreExisting.Message}");
                     return response;
                 }
 
@@ -534,42 +569,35 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                         .ListItems
                         .Include(li => li.ItemTags)
                         .Include(li => li.Icon)
-                        .Where(li => li.Name == originalName
-                                && li.Brand == originalBrand)
+                        .Where(li => li.UserListId == userListResponse.Data.Id &&
+                                li.Name == originalName &&
+                                li.Brand == originalBrand)
                         .FirstOrDefaultAsync();
 
-                updatedListItem.Name = model.Name;
 
-                updatedListItem.Brand = model.Brand;
-
-                updatedListItem.Description = model.Description;
-
-                updatedListItem.ExpirationDate = model.ExpirationDate;
-
-                //sets icon to the pre-existing icon from model in DB if it exists otherwise creates a new one.
-                updatedListItem.Icon = await Context.Icons.Where(i => i.Name == model.IconDTO.Name).FirstOrDefaultAsync() ??
-                        new Icon() { Name = model.IconDTO.Name, Path = model.IconDTO.Path };
-
-                updatedListItem.ItemTags.Clear();
-
+                updatedListItem.Name = model.Name ?? updatedListItem.Name;
+                updatedListItem.Brand = model.Brand ?? updatedListItem.Brand;
+                updatedListItem.Description = model.Description ?? updatedListItem.Description;
+                updatedListItem.ExpirationDate = model.ExpirationDate ?? DateTime.MaxValue;
+                updatedListItem.Icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync() ??
+                        new IconModel() { Name = model.IconName, Path = model.IconPath };
                 //add pre-existing item tags from model
-                updatedListItem.ItemTags.AddRange(await Context.ItemTags
-                        .Where(it => model.ItemTagDTOs
-                                .Select(itdto => itdto.Name)
+                updatedListItem.ItemTags = await Context.ItemTags
+                        .Where(it => model.ItemTagNames
                                 .Contains(it.Name))
-                        .ToListAsync());
+                    .Concat(
+                    //add new item tags from model
+                    model.ItemTagNames
+                            .Where(itname => !Context.ItemTags
+                                    .Select(it => it.Name)
+                                    .Contains(itname))
+                            .Select(itname => new ItemTagModel() { Name = itname }))
+                    .ToListAsync();
 
-                //add new item tags from model
-                updatedListItem.ItemTags.AddRange(model.ItemTagDTOs
-                        .Where(itdto => !Context.ItemTags
-                                .Select(it => it.Name)
-                                .Contains(itdto.Name))
-                        .Select(itdto => new ItemTag() { Name = itdto.Name })
-                        .ToList());
 
                 //make sure inactive tags are set to active when assigned to this list item.
                 var inactiveTags = updatedListItem.ItemTags.Where(it => it.Status != Status.active).ToList();
-                foreach (ItemTag itemTag in inactiveTags)
+                foreach (ItemTagModel itemTag in inactiveTags)
                 {
                     itemTag.Status = Status.active;
                 }
@@ -579,28 +607,21 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 
                 //update item tags' status to inactive if admin created or to deleted if user created
                 //if any were removed from all item templates and list items.
-                var noItemsItemTags = await Context.ItemTags.Where(it => !it.Items.Any()).ToListAsync();
-                foreach (ItemTag itemTag in noItemsItemTags)
+                var noItemsItemTags = Context.ItemTags.Where(it => !it.Items.Any());
+                foreach (ItemTagModel itemTag in noItemsItemTags)
                 {
-                    if (itemTag.UserCreated)
-                    {
-                        itemTag.Status = Status.deleted;
-                    }
-                    else
-                    {
-                        itemTag.Status = Status.inactive;
-                    }
+                    itemTag.Status = itemTag.Pinned ? Status.inactive : Status.deleted;
                 }
 
                 await Context.SaveChangesAsync();
 
-                response.Data = new ListItemDTO(updatedListItem);
+                response.Data = new ListItemReadDTO(updatedListItem);
             }
             catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = $"An error occured while attempting to update the specified List Item.";
-                LILogger.LogError($"An error occured while attempting to update List Item in {userName}'s list: {userListName} with original Name: {originalName} and original Brand: {originalBrand}. Message: {ex.Message}");
+                LILogger.LogError($"An error occured while attempting to update List Item in list of User with Email: {userEmail} with name: {userListName} with original Name: {originalName} and original Brand: {originalBrand}. Message: {ex.Message}");
                 return response;
             }
 
@@ -608,19 +629,28 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             return response;
         }
 
-        public async Task<Response<ListItemDTO>> SetQuantity(string userName, string userListName, string name, string brand, int quantity)
+        public async Task<ResponseModel<ListItemReadDTO>> SetQuantity(string userEmail, string userListName, string name, string brand, int quantity)
         {
-            Response<ListItemDTO> response = new();
+            ResponseModel<ListItemReadDTO> response = new();
 
             try
             {
-                Response<ListItemDTO> verifyPreExisting = await RetrieveByUserListAndNameAndBrand(userName, userListName, name, brand);
+                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+
+                if (!userListResponse.Success)
+                {
+                    response.Success = false;
+                    response.Message = userListResponse.Message;
+                    return response;
+                }
+
+                ResponseModel<ListItemReadDTO> verifyPreExisting = await RetrieveByUserListAndNameAndBrand(userEmail, userListName, name, brand);
 
                 if (!verifyPreExisting.Success)
                 {
                     response.Success = false;
                     response.Message = $"Failed to find the specified List Item to update quantity. Message: {verifyPreExisting.Message}";
-                    LILogger.LogError($"Failed to find List Item in {userName}'s list: {userListName} with Name: {name} and Brand: {brand} to update quantity. Message: {verifyPreExisting.Message}");
+                    LILogger.LogError($"Failed to find List Item in list of User with Email: {userEmail} with name: {userListName} with Name: {name} and Brand: {brand} to update quantity. Message: {verifyPreExisting.Message}");
                     return response;
                 }
 
@@ -629,8 +659,9 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                         .ListItems
                         .Include(li => li.ItemTags)
                         .Include(li => li.Icon)
-                        .Where(li => li.Name == name
-                                && li.Brand == brand)
+                        .Where(li => li.UserListId == userListResponse.Data.Id &&
+                                li.Name == name &&
+                                li.Brand == brand)
                         .FirstOrDefaultAsync();
 
                 updatedListItem.Quantity = quantity;
@@ -638,13 +669,13 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 Context.ListItems.Update(updatedListItem);
                 await Context.SaveChangesAsync();
 
-                response.Data = new ListItemDTO(updatedListItem);
+                response.Data = new ListItemReadDTO(updatedListItem);
             }
             catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = $"An error occured while attempting to update the specified List Item's quantity.";
-                LILogger.LogError($"An error occured while attempting to update List Item's quantity in {userName}'s list: {userListName} with Name: {name} and Brand: {brand}. Message: {ex.Message}");
+                LILogger.LogError($"An error occured while attempting to update List Item's quantity in list of User with Email: {userEmail} with name: {userListName} with Name: {name} and Brand: {brand}. Message: {ex.Message}");
                 return response;
             }
 
@@ -652,19 +683,28 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             return response;
         }
 
-        public async Task<Response<ListItemDTO>> SetActiveStatus(string userName, string userListName, string name, string brand)
+        public async Task<ResponseModel<ListItemReadDTO>> SetActiveStatus(string userEmail, string userListName, string name, string brand)
         {
-            Response<ListItemDTO> response = new();
+            ResponseModel<ListItemReadDTO> response = new();
 
             try
             {
-                Response<ListItemDTO> verifyPreExisting = await RetrieveByUserListAndNameAndBrand(userName, userListName, name, brand);
+                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+
+                if (!userListResponse.Success)
+                {
+                    response.Success = false;
+                    response.Message = userListResponse.Message;
+                    return response;
+                }
+
+                ResponseModel<ListItemReadDTO> verifyPreExisting = await RetrieveByUserListAndNameAndBrand(userEmail, userListName, name, brand);
 
                 if (!verifyPreExisting.Success)
                 {
                     response.Success = false;
                     response.Message = $"Failed to find List Item with Name: {name} and Brand: {brand} to activate. Message: {verifyPreExisting.Message}";
-                    LILogger.LogError($"Failed to find List Item in {userName}'s list: {userListName} with Name: {name} and Brand: {brand} to set active status. Message: {verifyPreExisting.Message}");
+                    LILogger.LogError($"Failed to find List Item in list of User with Email: {userEmail} with name: {userListName} with Name: {name} and Brand: {brand} to set active status. Message: {verifyPreExisting.Message}");
                     return response;
                 }
 
@@ -673,8 +713,9 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                         .ListItems
                         .Include(li => li.ItemTags)
                         .Include(li => li.Icon)
-                        .Where(it => it.Name == name
-                                && it.Brand == brand)
+                        .Where(li => li.UserListId == userListResponse.Data.Id &&
+                                li.Name == name &&
+                                li.Brand == brand)
                         .FirstOrDefaultAsync();
 
                 activatedStatusListItem.Status = Status.active;
@@ -683,13 +724,13 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 Context.ListItems.Update(activatedStatusListItem);
                 await Context.SaveChangesAsync();
 
-                response.Data = new ListItemDTO(activatedStatusListItem);
+                response.Data = new ListItemReadDTO(activatedStatusListItem);
             }
             catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = $"An error occured while attempting to activate List Item with Name: {name} and Brand: {brand}.";
-                LILogger.LogError($"An error occured while attempting to set active status for List Item in {userName}'s list: {userListName} with Name: {name} and Brand: {brand}. Message: {ex.Message}");
+                LILogger.LogError($"An error occured while attempting to set active status for List Item in list of User with Email: {userEmail} with name: {userListName} with Name: {name} and Brand: {brand}. Message: {ex.Message}");
                 return response;
             }
 
@@ -697,19 +738,28 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             return response;
         }
 
-        public async Task<Response<ListItemDTO>> SetDeletedStatus(string userName, string userListName, string name, string brand)
+        public async Task<ResponseModel<ListItemReadDTO>> SetDeletedStatus(string userEmail, string userListName, string name, string brand)
         {
-            Response<ListItemDTO> response = new();
+            ResponseModel<ListItemReadDTO> response = new();
 
             try
             {
-                Response<ListItemDTO> verifyPreExisting = await RetrieveByUserListAndNameAndBrand(userName, userListName, name, brand);
+                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+
+                if (!userListResponse.Success)
+                {
+                    response.Success = false;
+                    response.Message = userListResponse.Message;
+                    return response;
+                }
+
+                ResponseModel<ListItemReadDTO> verifyPreExisting = await RetrieveByUserListAndNameAndBrand(userEmail, userListName, name, brand);
 
                 if (!verifyPreExisting.Success)
                 {
                     response.Success = false;
                     response.Message = $"Failed to find List Item with Name: {name} and Brand: {brand} to delete. Message: {verifyPreExisting.Message}";
-                    LILogger.LogError($"Failed to find List Item in {userName}'s list: {userListName} with Name: {name} and Brand: {brand} to set deleted status. Message: {verifyPreExisting.Message}");
+                    LILogger.LogError($"Failed to find List Item in list of User with Email: {userEmail} with name: {userListName} with Name: {name} and Brand: {brand} to set deleted status. Message: {verifyPreExisting.Message}");
                     return response;
                 }
 
@@ -718,8 +768,9 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                         .ListItems
                         .Include(li => li.ItemTags)
                         .Include(li => li.Icon)
-                        .Where(it => it.Name == name
-                                && it.Brand == brand)
+                        .Where(li => li.UserListId == userListResponse.Data.Id &&
+                                li.Name == name &&
+                                li.Brand == brand)
                         .FirstOrDefaultAsync();
 
                 deletedStatusListItem.Status = Status.deleted;
@@ -729,13 +780,13 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 Context.ListItems.Update(deletedStatusListItem);
                 await Context.SaveChangesAsync();
 
-                response.Data = new ListItemDTO(deletedStatusListItem);
+                response.Data = new ListItemReadDTO(deletedStatusListItem);
             }
             catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = $"An error occured while attempting to delete List Item with Name: {name} and Brand: {brand}.";
-                LILogger.LogError($"An error occured while attempting to set deleted status for List Item in {userName}'s list: {userListName} with Name: {name} and Brand: {brand}. Message: {ex.Message}");
+                LILogger.LogError($"An error occured while attempting to set deleted status for Item in list of User with Email: {userEmail} with name: {userListName} with Name: {name} and Brand: {brand}. Message: {ex.Message}");
                 return response;
             }
 
@@ -743,19 +794,28 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
             return response;
         }
 
-        public async Task<Response<ListItemDTO>> Delete(string userName, string userListName, string name, string brand)
+        public async Task<ResponseModel<ListItemReadDTO>> Delete(string userEmail, string userListName, string name, string brand)
         {
-            Response<ListItemDTO> response = new();
+            ResponseModel<ListItemReadDTO> response = new();
 
             try
             {
-                Response<ListItemDTO> verifyPreExisting = await RetrieveByUserListAndNameAndBrand(userName, userListName, name, brand);
+                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+
+                if (!userListResponse.Success)
+                {
+                    response.Success = false;
+                    response.Message = userListResponse.Message;
+                    return response;
+                }
+
+                ResponseModel<ListItemReadDTO> verifyPreExisting = await RetrieveByUserListAndNameAndBrand(userEmail, userListName, name, brand);
 
                 if (!verifyPreExisting.Success)
                 {
                     response.Success = false;
                     response.Message = $"Failed to find List Item with Name: {name} and Brand: {brand} to permanently delete. Message: {verifyPreExisting.Message}";
-                    LILogger.LogError($"Failed to find List Item in {userName}'s list: {userListName} with Name: {name} and Brand: {brand} to permanently delete. Message: {verifyPreExisting.Message}");
+                    LILogger.LogError($"Failed to find List Item in list of User with Email: {userEmail} with name: {userListName} with Name: {name} and Brand: {brand} to permanently delete. Message: {verifyPreExisting.Message}");
                     return response;
                 }
 
@@ -764,8 +824,9 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                         .ListItems
                         .Include(li => li.ItemTags)
                         .Include(li => li.Icon)
-                        .Where(it => it.Name == name
-                                && it.Brand == brand)
+                        .Where(li => li.UserListId == userListResponse.Data.Id &&
+                                li.Name == name &&
+                                li.Brand == brand)
                         .FirstOrDefaultAsync();
 
                 if (deletedListItem.Status != Status.deleted)
@@ -779,7 +840,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 Context.ListItems.Remove(deletedListItem);
                 await Context.SaveChangesAsync();
 
-                Response<ListItemDTO> verifyDeleted = await RetrieveById(deletedListItem.Id);
+                ResponseModel<ListItemReadDTO> verifyDeleted = await RetrieveById(deletedListItem.Id);
 
                 if (verifyDeleted.Success)
                 {
@@ -789,34 +850,72 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                     return response;
                 }
 
-                //update item tags' status if admin created or delete if user created
+                //update item tags' status to inactive if admin created or to deleted if user created
                 //if any were removed from all item templates and list items.
-                var noItemsItemTags = await Context.ItemTags.Where(it => !it.Items.Any()).ToListAsync();
-                foreach (ItemTag itemTag in noItemsItemTags)
+                var noItemsItemTags = Context.ItemTags.Where(it => !it.Items.Any());
+                foreach (ItemTagModel itemTag in noItemsItemTags)
                 {
-                    if (itemTag.UserCreated)
-                    {
-                        itemTag.Status = Status.deleted;
-                    }
-                    else
-                    {
-                        itemTag.Status = Status.inactive;
-                    }
+                    itemTag.Status = itemTag.Pinned ? Status.inactive : Status.deleted;
                 }
 
                 await Context.SaveChangesAsync();
 
-                response.Data = new ListItemDTO(deletedListItem);
+                response.Data = new ListItemReadDTO(deletedListItem);
             }
             catch (Exception ex)
             {
                 response.Success = false;
                 response.Message = $"An error occured while attempting to permanently delete List Item with Name: {name} and Brand: {brand}.";
-                LILogger.LogError($"An error occured while attempting to permanently delete List Item in {userName}'s list: {userListName} with Name: {name} and Brand: {brand}. Message: {ex.Message}");
+                LILogger.LogError($"An error occured while attempting to permanently delete List Item in list of User with Email: {userEmail} with name: {userListName} with Name: {name} and Brand: {brand}. Message: {ex.Message}");
                 return response;
             }
 
             response.Message = $"Successfully permanently deleted List Item with Name: {name} and Brand: {brand}.";
+            return response;
+        }
+
+        //helper methods
+        private async Task<ResponseModel<UserListModel>> HGetUserListFromNameAndEmail(string userEmail, string userListName)
+        {
+            ResponseModel<UserListModel> response = new();
+
+            try
+            {
+                var user = await Context.Users
+                            .Where(u => u.Email == userEmail)
+                            .FirstOrDefaultAsync();
+
+                if (user == null)
+                {
+                    response.Success = false;
+                    response.Message = $"Could not find a User with the specified email address.";
+                    LILogger.LogError($"Could not find a User with Email: {userEmail}.");
+                    return response;
+                }
+
+                var userList = await Context.UserLists
+                        .Where(ul => ul.UserId == user.Id &&
+                                ul.Name == userListName)
+                        .FirstOrDefaultAsync();
+
+                if (userList == null)
+                {
+                    response.Success = false;
+                    response.Message = $"Could not find a User List with Name: {userListName} for this user.";
+                    LILogger.LogError($"Could not find a User List with Name: {userListName} for user with Email: {userEmail}.");
+                    return response;
+                }
+
+                response.Data = userList;
+            }
+            catch(Exception ex)
+            {
+                response.Success = false;
+                response.Message = $"An error occured while attempting to find User by Email and User List by Name.";
+                LILogger.LogError($"An error occured while attempting to find User by Email: {userEmail} and User List by Name: {userListName}. Message: {ex.Message}");
+                return response;
+            }
+
             return response;
         }
     }

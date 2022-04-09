@@ -1,16 +1,20 @@
 ﻿using KitchenManager.API.IconsNS;
 using KitchenManager.API.ItemsNS.ListItemsNS;
-using KitchenManager.API.SharedNS.StatusNS;
 using KitchenManager.API.UsersNS;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KitchenManager.API.UserListsNS
 {
-    public class UserList
+    public class UserListModel
     {
         [Required]
         public int Id { get; set; } = 0;
+
+        [Required]
+        [ForeignKey("User")]
+        public int UserId { get; set; }
 
         [Required]
         [MaxLength(256)]
@@ -19,10 +23,8 @@ namespace KitchenManager.API.UserListsNS
         [MaxLength(256)]
         public string Description { get; set; } = string.Empty;
 
-        public Icon Icon { get; set; } = new();
+        public IconModel Icon { get; set; }
 
-        public List<ListItem> ListItems { get; set; } = new();
-
-        public User User { get; set; } = new();
+        public List<ListItemModel> ListItems { get; set; } = new();
     }
 }

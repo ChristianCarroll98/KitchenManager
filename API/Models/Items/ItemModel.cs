@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KitchenManager.API.ItemsNS
 {
-    public abstract class Item
+    public abstract class ItemModel
     {
         [Required]
         public int Id { get; set; }
@@ -26,9 +26,9 @@ namespace KitchenManager.API.ItemsNS
         [Column(TypeName = "varchar(256)")]
         public string Discriminator { get; set; }
 
-        public Icon Icon { get; set; } = new();
+        public IconModel Icon { get; set; }
 
-        public List<ItemTag> ItemTags { get; set; } = new List<ItemTag>();
+        public List<ItemTagModel> ItemTags { get; set; } = new List<ItemTagModel>();
 
         public Status Status { get; set; } = Status.active;
     }

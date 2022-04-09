@@ -14,11 +14,11 @@ namespace KitchenManager.API.Data
 {
     public class KMDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
-        public DbSet<UserList> UserLists { get; set; }
-        public DbSet<ListItem> ListItems { get; set; }
-        public DbSet<ItemTag> ItemTags { get; set; }
-        public DbSet<ItemTemplate> ItemTemplates { get; set; }
-        public DbSet<Icon> Icons { get; set; }
+        public DbSet<UserListModel> UserLists { get; set; }
+        public DbSet<ListItemModel> ListItems { get; set; }
+        public DbSet<ItemTagModel> ItemTags { get; set; }
+        public DbSet<ItemTemplateModel> ItemTemplates { get; set; }
+        public DbSet<IconModel> Icons { get; set; }
 
         public KMDbContext(DbContextOptions<KMDbContext> options) : base(options)
         {
@@ -115,14 +115,14 @@ namespace KitchenManager.API.Data
                 b.ToTable("Users");
             });
 
-            builder.Entity<UserList>(b =>
+            builder.Entity<UserListModel>(b =>
             {
                 b.HasKey(ul => ul.Id);
 
                 b.ToTable("UserLists");
             });
 
-            builder.Entity<Item>(b =>
+            builder.Entity<ItemModel>(b =>
             {
                 b.HasKey(i => i.Id);
 
@@ -131,24 +131,24 @@ namespace KitchenManager.API.Data
                 b.ToTable("Items");
             });
 
-            builder.Entity<ListItem>(b =>
+            builder.Entity<ListItemModel>(b =>
             {
-                b.HasBaseType<Item>();
+                b.HasBaseType<ItemModel>();
             });
 
-            builder.Entity<ItemTemplate>(b =>
+            builder.Entity<ItemTemplateModel>(b =>
             {
-                b.HasBaseType<Item>();
+                b.HasBaseType<ItemModel>();
             });
 
-            builder.Entity<ItemTag>(b =>
+            builder.Entity<ItemTagModel>(b =>
             {
                 b.HasKey(it => it.Id);
 
                 b.ToTable("ItemTags");
             });
 
-            builder.Entity<Icon>(b =>
+            builder.Entity<IconModel>(b =>
             {
                 b.HasKey(i => i.Id);
             });

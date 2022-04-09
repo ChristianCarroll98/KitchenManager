@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace KitchenManager.API.Data.Seed
+﻿namespace KitchenManager.API.Data.Seed
 {
     public class KMUserSeedModel
     {

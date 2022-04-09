@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KitchenManager.API.IconsNS
 {
-    public class Icon
+    public class IconModel
     {
         [Required]
         public int Id { get; set; }
