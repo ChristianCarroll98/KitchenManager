@@ -87,7 +87,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 
             try
             {
-                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+                var userListResponse = await HGetUserListFromNameAndEmail(userEmail, userListName);
                 
                 if (!userListResponse.Success)
                 {
@@ -124,7 +124,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 return response;
             }
 
-            response.Message = $"Successfully retrieved List Items with Brand: {brand}.";
+            response.Message = $"Successfully retrieved {response.Data.Count()} List Items with Brand: {brand}.";
             return response;
         }
 
@@ -134,7 +134,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 
             try
             {
-                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+                var userListResponse = await HGetUserListFromNameAndEmail(userEmail, userListName);
 
                 if (!userListResponse.Success)
                 {
@@ -172,7 +172,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 return response;
             }
 
-            response.Message = $"Successfully retrieved List Item with the specified status.";
+            response.Message = $"Successfully retrieved List Item with the specified Name: {name} and Brand: {brand}.";
             return response;
         }
 
@@ -182,7 +182,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 
             try
             {
-                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+                var userListResponse = await HGetUserListFromNameAndEmail(userEmail, userListName);
 
                 if (!userListResponse.Success)
                 {
@@ -218,7 +218,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 return response;
             }
 
-            response.Message = $"Successfully retrieved List Items with the specified status.";
+            response.Message = $"Successfully retrieved {response.Data.Count()} List Items with the specified status.";
             return response;
         }
 
@@ -228,7 +228,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 
             try
             {
-                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+                var userListResponse = await HGetUserListFromNameAndEmail(userEmail, userListName);
 
                 if (!userListResponse.Success)
                 {
@@ -237,19 +237,20 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                     return response;
                 }
 
-                var listItems = await Context
+                var listItems = Context
                         .ListItems
                         .Include(li => li.ItemTags)
                         .Include(li => li.Icon)
-                        .Where(li => li.UserListId == userListResponse.Data.Id &&
+                        .AsEnumerable()
+                        .Where(li =>
+                                li.Status == Status.active &&
+                                li.UserListId == userListResponse.Data.Id &&
                                 (tagNames.Any() ?
-                                        li.ItemTags
-                                                .Select(it => it.Name)
-                                                .Any(itn => tagNames
-                                                        .Contains(itn)) :
-                                        !li.ItemTags.Any()) &&
-                                li.Status == Status.active)
-                        .ToListAsync();
+                                        tagNames.All(tn => li.ItemTags
+                                                .Select(itg => itg.Name)
+                                                .Contains(tn)) :
+                                        !li.ItemTags.Any()))
+                        .ToList();
 
                 if (!listItems.Any())
                 {
@@ -269,7 +270,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 return response;
             }
 
-            response.Message = $"Successfully retrieved List Items with the specified tags: {string.Join(", ", tagNames)}.";
+            response.Message = $"Successfully retrieved {response.Data.Count()} List Items with the specified tags: {string.Join(", ", tagNames)}.";
             return response;
         }
 
@@ -279,7 +280,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 
             try
             {
-                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+                var userListResponse = await HGetUserListFromNameAndEmail(userEmail, userListName);
 
                 if (!userListResponse.Success)
                 {
@@ -315,7 +316,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                 return response;
             }
 
-            response.Message = $"Successfully retrieved List Items.";
+            response.Message = $"Successfully retrieved {response.Data.Count()} List Items.";
             return response;
         }
 
@@ -325,7 +326,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 
             try
             {
-                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+                var userListResponse = await HGetUserListFromNameAndEmail(userEmail, userListName);
 
                 if (!userListResponse.Success)
                 {
@@ -444,7 +445,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 
             try
             {
-                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+                var userListResponse = await HGetUserListFromNameAndEmail(userEmail, userListName);
 
                 if (!userListResponse.Success)
                 {
@@ -545,7 +546,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 
             try
             {
-                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+                var userListResponse = await HGetUserListFromNameAndEmail(userEmail, userListName);
 
                 if (!userListResponse.Success)
                 {
@@ -635,7 +636,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 
             try
             {
-                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+                var userListResponse = await HGetUserListFromNameAndEmail(userEmail, userListName);
 
                 if (!userListResponse.Success)
                 {
@@ -689,7 +690,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 
             try
             {
-                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+                var userListResponse = await HGetUserListFromNameAndEmail(userEmail, userListName);
 
                 if (!userListResponse.Success)
                 {
@@ -744,7 +745,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 
             try
             {
-                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+                var userListResponse = await HGetUserListFromNameAndEmail(userEmail, userListName);
 
                 if (!userListResponse.Success)
                 {
@@ -800,7 +801,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 
             try
             {
-                var userListResponse = HGetUserListFromNameAndEmail(userEmail, userListName).Result;
+                var userListResponse = await HGetUserListFromNameAndEmail(userEmail, userListName);
 
                 if (!userListResponse.Success)
                 {

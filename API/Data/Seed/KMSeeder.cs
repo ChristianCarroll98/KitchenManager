@@ -222,7 +222,7 @@ namespace KitchenManager.API.Data.Seed
                         Description = itemTemplateSeedModel.Description,
                         ExpirationDays = itemTemplateSeedModel.ExpirationDays,
                         Icon = Context.Icons.OrderBy(g => Guid.NewGuid()).FirstOrDefault(),
-                        ItemTags = Context.ItemTags.OrderBy(g => Guid.NewGuid()).Take(Random.Next(1, 4)).ToList()
+                        ItemTags = Context.ItemTags.OrderBy(g => Guid.NewGuid()).Take(Random.Next(0, 3)).ToList()
                     };
 
                     await Context.ItemTemplates.AddAsync(itemTemplate);
@@ -286,6 +286,15 @@ namespace KitchenManager.API.Data.Seed
 
                 await Context.SaveChangesAsync();
             }
+
+            //set item tag status to active for each one that was assigned to an item.
+            var activateTags = await Context.ItemTags.Where(it => it.Items.Any()).ToListAsync();
+            foreach (ItemTagModel itemTag in activateTags)
+            {
+                itemTag.Status = Status.active;
+            }
+
+            await Context.SaveChangesAsync();
         }
     }
 }

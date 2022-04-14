@@ -109,7 +109,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 return response;
             }
 
-            response.Message = $"Successfully retrieved Item Templates with Name: {name}.";
+            response.Message = $"Successfully retrieved {response.Data.Count()} Item Templates with Name: {name}.";
             return response;
         }
 
@@ -145,7 +145,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 return response;
             }
 
-            response.Message = $"Successfully retrieved Item Templates with Brand: {brand}.";
+            response.Message = $"Successfully retrieved {response.Data.Count()} Item Templates with Brand: {brand}.";
             return response;
         }
 
@@ -191,19 +191,20 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
 
             try
             {
-                var itemTemplates = await Context
+                var itemTemplates = Context
                         .ItemTemplates
                         .Include(it => it.ItemTags)
                         .Include(it => it.Icon)
-                        .Where(it => 
+                        .AsEnumerable()
+                        .Where(it =>
+                                it.Status == Status.active &&
                                 (tagNames.Any() ?
-                                        it.ItemTags
-                                                .Select(it => it.Name)
-                                                .Any(itn => tagNames
-                                                        .Contains(itn)) :
-                                        !it.ItemTags.Any()) &&
-                                it.Status == Status.active)
-                        .ToListAsync();
+                                
+                                        tagNames.All(tn => it.ItemTags
+                                                .Select(itg => itg.Name)
+                                                .Contains(tn)) :
+                                        !it.ItemTags.Any()))
+                        .ToList();
 
                 if (!itemTemplates.Any())
                 {
@@ -223,7 +224,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 return response;
             }
 
-            response.Message = $"Successfully retrieved Item Templates with the specified tags: {string.Join(", ", tagNames)}.";
+            response.Message = $"Successfully retrieved {response.Data.Count()} Item Templates with the specified tags: {string.Join(", ", tagNames)}.";
             return response;
         }
 
@@ -258,7 +259,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 return response;
             }
 
-            response.Message = $"Successfully retrieved Item Templates with the specified status.";
+            response.Message = $"Successfully retrieved {response.Data.Count()} Item Templates with the specified status.";
             return response;
         }
 
@@ -293,7 +294,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 return response;
             }
 
-            response.Message = $"Successfully retrieved the list of Item Templates.";
+            response.Message = $"Successfully retrieved the list of {response.Data.Count()} Item Templates.";
             return response;
         }
 

@@ -130,7 +130,7 @@ namespace KitchenManager.API.ItemTagsNS.Repo
                 return response;
             }
 
-            response.Message = $"Successfully retrieved Item Tags with the specified status.";
+            response.Message = $"Successfully retrieved {response.Data.Count()} Item Tags with the specified status.";
             return response;
         }
 
@@ -163,7 +163,7 @@ namespace KitchenManager.API.ItemTagsNS.Repo
                 return response;
             }
 
-            response.Message = $"Successfully retrieved the list of Item Tags.";
+            response.Message = $"Successfully retrieved the list of {response.Data.Count()} Item Tags.";
             return response;
         }
 
