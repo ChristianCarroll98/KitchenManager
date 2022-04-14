@@ -28,7 +28,7 @@ namespace KitchenManager
                 var seeder = scope.ServiceProvider.GetService<KMSeeder>();
                 seeder.RootPath = Directory.GetCurrentDirectory();
 
-                bool clearData = true;
+                bool clearData = false;
 
                 seeder.SeedDataAsync(clearData).Wait();
             }

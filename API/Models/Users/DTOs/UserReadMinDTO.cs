@@ -6,7 +6,7 @@
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
 
-        public UserReadMinDTO(User user = null)
+        public UserReadMinDTO(UserModel user = null)
         {
             UserName = user.UserName ?? string.Empty;
             Email = user.Email ?? string.Empty;

@@ -4,12 +4,6 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
 {
     public class ItemTemplateModel : ItemModel
     {
-        [Range(1, int.MaxValue)]
-        public int? ExpirationDays { get; set; }
-
-        public ItemTemplateModel()
-        {
-            Discriminator = "ItemTemplate";
-        }
+        public int ExpirationDays { get; set; } // if <= 0, no expiration date.
     }
 }

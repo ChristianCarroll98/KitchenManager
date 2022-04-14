@@ -13,7 +13,7 @@ namespace KitchenManager.API.UsersNS.DTO
         public List<UserListReadNoItemsDTO> UserLists { get; set; }
         public List<UserClaimReadDTO> UserClaims { get; set; }
 
-        public UserReadDTO(User user = null, List<IdentityUserClaim<int>> userClaims = null)
+        public UserReadDTO(UserModel user = null, List<IdentityUserClaim<int>> userClaims = null)
         {
             UserName = user.UserName ?? string.Empty;
             Email = user.Email ?? string.Empty;

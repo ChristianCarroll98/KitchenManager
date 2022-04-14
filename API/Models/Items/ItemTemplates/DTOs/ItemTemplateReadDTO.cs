@@ -8,18 +8,18 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.DTO
         public string Name { get; set; }
         public string Brand { get; set; }
         public string Description { get; set; }
-        public int? ExpirationDays { get; set; }
+        public int ExpirationDays { get; set; }
         public string IconPath { get; set; }
         public List<string> ItemTagNames { get; set; }
 
-        public ItemTemplateReadDTO(ItemTemplateModel itemTemplate = null)
+        public ItemTemplateReadDTO(ItemTemplateModel itemTemplate)
         {
-            Name = itemTemplate.Name ?? string.Empty;
-            Brand = itemTemplate.Brand ?? string.Empty;
-            Description = itemTemplate.Description ?? string.Empty;
+            Name = itemTemplate.Name;
+            Brand = itemTemplate.Brand;
+            Description = itemTemplate.Description;
             ExpirationDays = itemTemplate.ExpirationDays;
-            IconPath = itemTemplate.Icon.Path ?? string.Empty;
-            ItemTagNames = itemTemplate.ItemTags.Select(it => it.Name).ToList() ?? new List<string>();
+            IconPath = itemTemplate.Icon.Path;
+            ItemTagNames = itemTemplate.ItemTags.Select(it => it.Name).ToList();
         }
     }
 }

@@ -29,7 +29,7 @@ namespace KitchenManager
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddIdentity<User, IdentityRole<int>>(options =>
+            services.AddIdentity<UserModel, IdentityRole<int>>(options =>
             {
                 options.User.RequireUniqueEmail = true;
             }).AddEntityFrameworkStores<KMDbContext>();

@@ -9,22 +9,12 @@ namespace KitchenManager.API.UserListsNS
 {
     public class UserListModel
     {
-        [Required]
-        public int Id { get; set; } = 0;
-
-        [Required]
-        [ForeignKey("User")]
+        public int Id { get; set; }
         public int UserId { get; set; }
-
-        [Required]
-        [MaxLength(256)]
-        public string Name { get; set; } = string.Empty;
-
-        [MaxLength(256)]
+        public string Name { get; set; }
         public string Description { get; set; } = string.Empty;
 
         public IconModel Icon { get; set; }
-
         public List<ListItemModel> ListItems { get; set; } = new();
     }
 }

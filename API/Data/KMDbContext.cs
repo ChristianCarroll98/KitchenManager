@@ -12,7 +12,7 @@ using KitchenManager.API.IconsNS;
 
 namespace KitchenManager.API.Data
 {
-    public class KMDbContext : IdentityDbContext<User, IdentityRole<int>, int>
+    public class KMDbContext : IdentityDbContext<UserModel, IdentityRole<int>, int>
     {
         public DbSet<UserListModel> UserLists { get; set; }
         public DbSet<ListItemModel> ListItems { get; set; }
@@ -86,7 +86,7 @@ namespace KitchenManager.API.Data
             });
 
             //My classes
-            builder.Entity<User>(b =>
+            builder.Entity<UserModel>(b =>
             {
                 b.Property(user => user.PhoneNumber)
                     .IsUnicode(false)
@@ -99,18 +99,18 @@ namespace KitchenManager.API.Data
                 b.Property(user => user.ConcurrencyStamp)
                     .IsUnicode(false)
                     .HasMaxLength(256)
-                    .IsRequired(true);
+                    .IsRequired();
 
                 b.Property(user => user.SecurityStamp)
                     .IsUnicode(false)
                     .HasMaxLength(256)
-                    .IsRequired(true);
+                    .IsRequired();
 
                 b.Property(user => user.Email)
-                    .IsRequired(true);
+                    .IsRequired();
                 
                 b.Property(user => user.NormalizedEmail)
-                   .IsRequired(true);
+                   .IsRequired();
 
                 b.ToTable("Users");
             });
@@ -119,6 +119,20 @@ namespace KitchenManager.API.Data
             {
                 b.HasKey(ul => ul.Id);
 
+                b.HasOne<UserModel>()
+                    .WithMany(u => u.UserLists)
+                    .HasForeignKey(ul => ul.UserId);
+
+                b.Property(ul => ul.Name)
+                    .IsRequired()
+                    .HasMaxLength(256);
+
+                b.Property(ul => ul.Description)
+                    .HasMaxLength(256);
+
+                b.HasOne(ul => ul.Icon)
+                    .WithMany();
+                 
                 b.ToTable("UserLists");
             });
 
@@ -126,7 +140,22 @@ namespace KitchenManager.API.Data
             {
                 b.HasKey(i => i.Id);
 
-                b.HasDiscriminator(i => i.Discriminator);
+                b.HasDiscriminator<string>("ItemType")
+                    .HasValue<ListItemModel>("ListItem")
+                    .HasValue<ItemTemplateModel>("ItemTemplate");
+
+                b.Property(i => i.Name)
+                    .IsRequired()
+                    .HasMaxLength(256);
+
+                b.Property(i => i.Brand)
+                    .HasMaxLength(256);
+
+                b.Property(i => i.Description)
+                    .HasMaxLength(256);
+
+                b.HasOne(i => i.Icon)
+                    .WithMany();
 
                 b.ToTable("Items");
             });
@@ -134,6 +163,10 @@ namespace KitchenManager.API.Data
             builder.Entity<ListItemModel>(b =>
             {
                 b.HasBaseType<ItemModel>();
+
+                b.HasOne<UserListModel>()
+                    .WithMany(ul => ul.ListItems)
+                    .HasForeignKey(li => li.UserListId);
             });
 
             builder.Entity<ItemTemplateModel>(b =>
@@ -145,12 +178,24 @@ namespace KitchenManager.API.Data
             {
                 b.HasKey(it => it.Id);
 
+                b.Property(it => it.Name)
+                    .IsRequired()
+                    .HasMaxLength(256);
+
                 b.ToTable("ItemTags");
             });
 
             builder.Entity<IconModel>(b =>
             {
                 b.HasKey(i => i.Id);
+
+                b.Property(i => i.Name)
+                    .IsRequired()
+                    .HasMaxLength(256);
+
+                b.Property(i => i.Path)
+                    .IsUnicode(false)
+                    .HasMaxLength(256);
             });
         }
     }

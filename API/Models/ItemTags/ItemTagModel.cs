@@ -7,17 +7,10 @@ namespace KitchenManager.API.ItemTagsNS
 {
     public class ItemTagModel
     {
-        [Required]
-        public int Id { get; set; } = 0;
-
-        [Required]
-        [MaxLength(256)]
-        public string Name { get; set; } = string.Empty;
-
+        public int Id { get; set; }
+        public string Name { get; set; }
         public bool Pinned { get; set; } = false;
-
         public List<ItemModel> Items { get; set; } = new();
-
         public Status Status { get; set; } = Status.inactive;
     }
 }

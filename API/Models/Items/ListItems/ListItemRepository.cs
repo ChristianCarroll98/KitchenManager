@@ -487,7 +487,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                     Brand = itemTemplateModel.Brand,
                     Description = itemTemplateModel.Description,
                     Quantity = 1,
-                    ExpirationDate = DateTime.UtcNow.AddDays(itemTemplateModel.ExpirationDays.Value).Date,
+                    ExpirationDate = DateTime.UtcNow.AddDays(itemTemplateModel.ExpirationDays).Date,
                     UserListId = userListResponse.Data.Id,
                     Icon = await Context.Icons.Where(i => i.Name == itemTemplateModel.IconName).FirstOrDefaultAsync() ??
                             new IconModel() { Name = itemTemplateModel.IconName, Path = itemTemplateModel.IconPath },

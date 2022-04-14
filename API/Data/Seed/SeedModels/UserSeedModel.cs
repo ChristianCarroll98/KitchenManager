@@ -1,6 +1,6 @@
 ﻿namespace KitchenManager.API.Data.Seed
 {
-    public class KMUserSeedModel
+    public class UserSeedModel
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

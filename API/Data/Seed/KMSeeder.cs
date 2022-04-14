@@ -15,22 +15,25 @@ using KitchenManager.API.UsersNS;
 using KitchenManager.API.UserListsNS;
 using KitchenManager.API.SharedNS.StatusNS;
 using KitchenManager.API.IconsNS;
+using Microsoft.Extensions.Logging;
 
 namespace KitchenManager.API.Data.Seed
 {
     public class KMSeeder
     {
         private readonly KMDbContext Context;
-        private readonly UserManager<User> UserManager;
+        private readonly UserManager<UserModel> UserManager;
         private readonly RoleManager<IdentityRole<int>> RoleManager;
+        private readonly ILogger<KMSeeder> SLogger;
         public string RootPath { get; set; }
         public Random Random;
 
-        public KMSeeder(KMDbContext context, UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager)
+        public KMSeeder(KMDbContext context, UserManager<UserModel> userManager, RoleManager<IdentityRole<int>> roleManager, ILogger<KMSeeder> sLogger)
         {
             Context = context;
             UserManager = userManager;
             RoleManager = roleManager;
+            SLogger = sLogger;
             RootPath = string.Empty;
             Random = new Random();
     }
@@ -38,15 +41,15 @@ namespace KitchenManager.API.Data.Seed
         public async Task SeedDataAsync(bool clearData)
         {
             //seed data
-            
+
             if (clearData)
             {
                 await Context.Database.EnsureDeletedAsync();
-                Console.Write("Database deleted.");
+                SLogger.LogInformation("Database deleted.");
             }
-            
+
             await Context.Database.EnsureCreatedAsync();
-            Console.Write("Database Exists or Created.");
+            SLogger.LogInformation("Database Exists or Created.");
 
             if (!(await Context.Roles.AnyAsync()))
             {
@@ -55,20 +58,20 @@ namespace KitchenManager.API.Data.Seed
 
                 await Context.SaveChangesAsync();
             }
-            
+
             if (!Context.Users.Any())
             {
                 //Add Admins
                 var filePathAdmin = Path.Combine(RootPath, "API/Data/Seed/SeedData/SeedAdmins.json");
                 var jsonAdmin = File.ReadAllText(filePathAdmin);
-                var adminData = JsonSerializer.Deserialize<IEnumerable<KMUserSeedModel>>(jsonAdmin);
+                var adminData = JsonSerializer.Deserialize<IEnumerable<UserSeedModel>>(jsonAdmin);
 
                 foreach (var adminSeedModel in adminData)
                 {
-                    User admin = await UserManager.FindByEmailAsync(adminSeedModel.Email);
-                    if(admin == null)
+                    UserModel admin = await UserManager.FindByEmailAsync(adminSeedModel.Email);
+                    if (admin == null)
                     {
-                        admin = new User()
+                        admin = new UserModel()
                         {
                             UserName = adminSeedModel.Email,
                             Email = adminSeedModel.Email,
@@ -76,7 +79,7 @@ namespace KitchenManager.API.Data.Seed
                         };
 
                         var result = await UserManager.CreateAsync(admin, "Password!1");
-                        if(result != IdentityResult.Success)
+                        if (result != IdentityResult.Success)
                         {
                             throw new InvalidOperationException("Could not create a new Admin in seeder: " + result.ToString());
                         }
@@ -118,14 +121,14 @@ namespace KitchenManager.API.Data.Seed
                 //Add Users
                 var filePathUser = Path.Combine(RootPath, "API/Data/Seed/SeedData/SeedUsers.json");
                 var jsonUser = File.ReadAllText(filePathUser);
-                var userData = JsonSerializer.Deserialize<IEnumerable<KMUserSeedModel>>(jsonUser);
+                var userData = JsonSerializer.Deserialize<IEnumerable<UserSeedModel>>(jsonUser);
 
                 foreach (var userSeedModel in userData)
                 {
-                    User user = await UserManager.FindByEmailAsync(userSeedModel.Email);
+                    UserModel user = await UserManager.FindByEmailAsync(userSeedModel.Email);
                     if (user == null)
                     {
-                        user = new User()
+                        user = new UserModel()
                         {
                             UserName = userSeedModel.Email,
                             Email = userSeedModel.Email,
@@ -188,7 +191,7 @@ namespace KitchenManager.API.Data.Seed
 
                 await Context.SaveChangesAsync();
             }
-            
+
             if (!(await Context.Icons.AnyAsync()))
             {
                 //Add test Icons
@@ -212,91 +215,70 @@ namespace KitchenManager.API.Data.Seed
 
                 foreach (var itemTemplateSeedModel in itemTemplateData)
                 {
-                    //get random icon
-                    var icon = await Context.Icons.Skip(Random.Next(Context.Icons.Count() - 1)).FirstOrDefaultAsync();
-
                     var itemTemplate = new ItemTemplateModel()
                     {
                         Name = itemTemplateSeedModel.Name,
                         Brand = itemTemplateSeedModel.Brand,
                         Description = itemTemplateSeedModel.Description,
                         ExpirationDays = itemTemplateSeedModel.ExpirationDays,
-                        Icon = icon
+                        Icon = Context.Icons.OrderBy(g => Guid.NewGuid()).FirstOrDefault(),
+                        ItemTags = Context.ItemTags.OrderBy(g => Guid.NewGuid()).Take(Random.Next(1, 4)).ToList()
                     };
 
-                    var takeNum = Random.Next(1, 4);
-                    var itemTags = await Context.ItemTags.OrderBy(g => Guid.NewGuid()).Skip(Random.Next(Context.ItemTags.Count() - takeNum)).Take(takeNum).ToListAsync();
-
-                    itemTemplate.ItemTags = itemTags;
-
-                    Context.ItemTemplates.Add(itemTemplate);
+                    await Context.ItemTemplates.AddAsync(itemTemplate);
                 }
 
                 await Context.SaveChangesAsync();
             }
 
-            if(!(await Context.UserLists.AnyAsync()))
+            if (!(await Context.UserLists.AnyAsync()))
             {
-                foreach (var user in Context.Users.ToList())
+                var users = await Context.Users.ToListAsync();
+                foreach (var user in users)
                 {
-                    var firstName = (await Context.UserClaims.Where(uc => uc.UserId == user.Id).FirstOrDefaultAsync()).ClaimValue;
-
-                    //get random icon
-                    var icon = await Context.Icons.Skip(Random.Next(Context.Icons.Count() - 1)).FirstOrDefaultAsync();
-
-                    var userList = new UserListModel()
+                    //Add 1 or 2 lists to each user
+                    for (int i = 1; i < Random.Next(2, 4); i++)
                     {
-                        Name = firstName + "'s first list",
-                        Description = "A list of random fake ingredient items.",
-                        UserId = user.Id,
-                        Icon = icon
-                    };
+                        var firstName = (await Context.UserClaims.Where(uc => uc.UserId == user.Id).FirstOrDefaultAsync()).ClaimValue;
 
-                    await Context.UserLists.AddAsync(userList);
-
-                    //test multiple lists for some test users
-                    if( Random.Next() % 3 == 0 ){
-
-                        icon = await Context.Icons.Skip(Random.Next(Context.Icons.Count() - 1)).FirstOrDefaultAsync();
-
-                        userList = new UserListModel()
+                        var userList = new UserListModel()
                         {
-                            Name = firstName + "'s second list",
+                            Name = $"{firstName}'s list #{i}",
                             Description = "A list of random fake ingredient items.",
                             UserId = user.Id,
-                            Icon = icon
+                            Icon = Context.Icons.OrderBy(g => Guid.NewGuid()).FirstOrDefault(),
                         };
 
-                        Context.UserLists.Add(userList);
+                        await Context.UserLists.AddAsync(userList);
                     }
                 }
 
                 await Context.SaveChangesAsync();
             }
 
-            if (!(await Context.ListItems.AnyAsync())){
+            if (!(await Context.ListItems.AnyAsync()))
+            {
                 //Add ListItems
-                foreach (var userList in (await Context.UserLists.ToListAsync()))
+                var userLists = await Context.UserLists.ToListAsync();
+                foreach (var userList in userLists)
                 {
-                    //add random number of items to each list
-                    foreach (var i in Enumerable.Range(0, Random.Next(20)))
+                    //add random number of items between 2 and 5 to each list
+                    for (int i = 0; i < Random.Next(2, 6); i++)
                     {
                         //get random itemTemplate
-                        var itemTemplate = await Context.ItemTemplates.Skip(Random.Next(Context.ItemTemplates.Count() - 1)).FirstOrDefaultAsync();
+                        var itemTemplate = Context.ItemTemplates.OrderBy(g => Guid.NewGuid()).FirstOrDefault();
 
                         var listItem = new ListItemModel()
                         {
+                            UserListId = userList.Id,
                             Name = itemTemplate.Name,
                             Brand = itemTemplate.Brand,
                             Description = itemTemplate.Description,
-                            Quantity = Random.Next(1, 5),
-                            ExpirationDate = DateTime.UtcNow.AddDays(itemTemplate.ExpirationDays.Value).Date,
-                            Icon = itemTemplate.Icon
+                            Quantity = Random.Next(1, 6),
+                            ExpirationDate = itemTemplate.ExpirationDays > 0 ? DateTime.UtcNow.AddDays(itemTemplate.ExpirationDays).Date : DateTime.MaxValue,
+                            Icon = itemTemplate.Icon,
+                            ItemTags = itemTemplate.ItemTags
                         };
-
-                        var itemTags = await Context.ItemTags.Where(it => it.Items.Contains(itemTemplate)).ToListAsync();
-
-                        listItem.ItemTags = itemTags;
 
                         await Context.ListItems.AddAsync(listItem);
                     }
@@ -304,14 +286,6 @@ namespace KitchenManager.API.Data.Seed
 
                 await Context.SaveChangesAsync();
             }
-
-            //set item tag status to active for each one that was assigned to an item.
-            foreach (ItemTagModel itemTag in (await Context.ItemTags.Where(it => it.Items.Any()).ToListAsync()))
-            {
-                itemTag.Status = Status.active;
-            }
-
-            await Context.SaveChangesAsync();
         }
     }
 }
