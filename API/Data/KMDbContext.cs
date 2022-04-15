@@ -12,7 +12,7 @@ using KitchenManager.API.IconsNS;
 
 namespace KitchenManager.API.Data
 {
-    public class KMDbContext : IdentityDbContext<UserModel, IdentityRole<int>, int>
+    public class KMDbContext : IdentityUserContext<UserModel, int>
     {
         public DbSet<UserListModel> UserLists { get; set; }
         public DbSet<ListItemModel> ListItems { get; set; }
@@ -30,7 +30,7 @@ namespace KitchenManager.API.Data
             base.OnModelCreating(builder);
 
             //Settings for Identity classes (int for Id column and table names)
-            builder.Entity<IdentityUserRole<int>>(b =>
+            /*builder.Entity<IdentityUserRole<int>>(b =>
             {
                 b.ToTable("UserRoles");
             });
@@ -55,7 +55,7 @@ namespace KitchenManager.API.Data
                     .HasMaxLength(256);
 
                 b.ToTable("RoleClaims");
-            });
+            });*/
 
             builder.Entity<IdentityUserClaim<int>>(b =>
             {

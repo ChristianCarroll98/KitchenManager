@@ -23,16 +23,16 @@ namespace KitchenManager.API.Data.Seed
     {
         private readonly KMDbContext Context;
         private readonly UserManager<UserModel> UserManager;
-        private readonly RoleManager<IdentityRole<int>> RoleManager;
+        //private readonly RoleManager<IdentityRole<int>> RoleManager;
         private readonly ILogger<KMSeeder> SLogger;
         public string RootPath { get; set; }
         public Random Random;
 
-        public KMSeeder(KMDbContext context, UserManager<UserModel> userManager, RoleManager<IdentityRole<int>> roleManager, ILogger<KMSeeder> sLogger)
+        public KMSeeder(KMDbContext context, UserManager<UserModel> userManager,/* RoleManager<IdentityRole<int>> roleManager, */ILogger<KMSeeder> sLogger)
         {
             Context = context;
             UserManager = userManager;
-            RoleManager = roleManager;
+            //RoleManager = roleManager;
             SLogger = sLogger;
             RootPath = string.Empty;
             Random = new Random();
@@ -51,13 +51,13 @@ namespace KitchenManager.API.Data.Seed
             await Context.Database.EnsureCreatedAsync();
             SLogger.LogInformation("Database Exists or Created.");
 
-            if (!(await Context.Roles.AnyAsync()))
+            /*if (!(await Context.Roles.AnyAsync()))
             {
                 await RoleManager.CreateAsync(new IdentityRole<int>() { Name = "Admin" });
                 await RoleManager.CreateAsync(new IdentityRole<int>() { Name = "User" });
 
                 await Context.SaveChangesAsync();
-            }
+            }*/
 
             if (!Context.Users.Any())
             {
@@ -85,7 +85,7 @@ namespace KitchenManager.API.Data.Seed
                         }
 
                         //ensure Admin role exists
-                        var adminRole = await RoleManager.FindByNameAsync("Admin");
+                        /*var adminRole = await RoleManager.FindByNameAsync("Admin");
                         if (adminRole == null)
                         {
                             throw new InvalidOperationException("Cant find Admin role in seeder");
@@ -100,7 +100,28 @@ namespace KitchenManager.API.Data.Seed
                         else
                         {
                             throw new InvalidOperationException("Cant find new Admin in seeder to add Role");
+                        }*/
+
+                        var newAdmin = await UserManager.FindByEmailAsync(admin.Email);
+                        if (newAdmin == null)
+                        {
+                            throw new InvalidOperationException("Cant find new Admin in seeder");
                         }
+
+                        await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
+                        {
+                            UserId = newAdmin.Id,
+                            ClaimType = "Admin",
+                            ClaimValue = ""
+                        });
+
+                        await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
+                        {
+                            UserId = newAdmin.Id,
+                            ClaimType = "User",
+                            ClaimValue = ""
+
+                        });
 
                         await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
                         {
@@ -142,7 +163,7 @@ namespace KitchenManager.API.Data.Seed
                         }
 
                         //ensure User role exists
-                        var userRole = await RoleManager.FindByNameAsync("User");
+                        /*var userRole = await RoleManager.FindByNameAsync("User");
                         if (userRole == null)
                         {
                             throw new InvalidOperationException("Cant find User role in seeder");
@@ -157,7 +178,21 @@ namespace KitchenManager.API.Data.Seed
                         else
                         {
                             throw new InvalidOperationException("Cant find new User in seeder to add Role");
+                        }*/
+
+                        var newUser = await UserManager.FindByEmailAsync(user.Email);
+                        if (newUser is null)
+                        {
+                            throw new InvalidOperationException("Cant find new User in seeder");
                         }
+
+                        await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
+                        {
+                            UserId = newUser.Id,
+                            ClaimType = "User",
+                            ClaimValue = ""
+
+                        });
 
                         await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
                         {

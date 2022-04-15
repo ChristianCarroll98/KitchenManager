@@ -10,7 +10,6 @@ namespace KitchenManager.API.UsersNS.Repo
     public interface IUserRepository
     {
         Task<ResponseModel<UserReadDTO>> RetrieveById(int id);
-        Task<ResponseModel<UserReadDTO>> RetrieveByUserName(string userName);
         Task<ResponseModel<UserReadDTO>> RetrieveByEmailAddress(string emailAddress);
         Task<ResponseModel<List<UserReadDTO>>> RetrieveByStatus(Status status); //admin only
 
