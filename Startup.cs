@@ -14,6 +14,7 @@ using KitchenManager.API.Data.Seed;
 using KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo;
 using KitchenManager.API.ItemsNS.ListItemsNS.Repo;
 using KitchenManager.API.ItemTagsNS.Repo;
+using KitchenManager.API.UserListsNS.Repo;
 
 namespace KitchenManager
 {
@@ -44,6 +45,7 @@ namespace KitchenManager
             services.AddScoped<IItemTemplateRepository, ItemTemplateRepository>();
             services.AddScoped<IListItemRepository, ListItemRepository>();
             services.AddScoped<IItemTagRepository, ItemTagRepository>();
+            services.AddScoped<IUserListRepository, UserListRepository>();
 
             services.AddControllersWithViews()
                 .AddNewtonsoftJson(options =>

@@ -33,7 +33,7 @@ namespace KitchenManager.API.ItemTagsNS
             }
             catch (Exception ex)
             {
-                ITLogger.LogError($"Failed to retrieve the Item TagName: {name}. Message: {ex.Message}");
+                ITLogger.LogError($"Failed to retrieve the Item Tag with Name: {name}. Message: {ex.Message}");
                 return BadRequest($"Failed to retrieve the Item Tag with Name: {name}.");
             }
         }

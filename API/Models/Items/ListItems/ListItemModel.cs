@@ -9,6 +9,5 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS
         public int Quantity { get; set; } = 1;
         public int UserListId { get; set; }
         public DateTime ExpirationDate { get; set; } = DateTime.MaxValue;
-        public DateTime DeletedDate { get; set; } = DateTime.MaxValue;
     }
 }

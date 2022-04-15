@@ -1,5 +1,4 @@
 ﻿using KitchenManager.API.Data;
-using KitchenManager.API.IconsNS;
 using KitchenManager.API.ItemsNS.ItemTemplatesNS.DTO;
 using KitchenManager.API.ItemTagsNS;
 using KitchenManager.API.SharedNS.ResponseNS;
@@ -315,14 +314,23 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                     return response;
                 }
 
+                var icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync();
+
+                if (icon == null)
+                {
+                    response.Success = false;
+                    response.Message = $"There is no Icon with Name: {model.IconName}.";
+                    ITLogger.LogError($"There is no Icon with Name: {model.IconName}.");
+                    return response;
+                }
+
                 var newItemTemplate = new ItemTemplateModel()
                 {
                     Name = model.Name,
                     Brand = model.Brand,
                     Description = model.Description,
                     ExpirationDays = model.ExpirationDays,
-                    Icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync() ??
-                            new IconModel() { Name = model.IconName, Path = model.IconPath },
+                    Icon = icon,
                     //add pre-existing item tags from model
                     ItemTags = await Context.ItemTags
                             .Where(it => model.ItemTagNames
@@ -387,6 +395,16 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                     return response;
                 }
 
+                var icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync();
+
+                if (icon == null)
+                {
+                    response.Success = false;
+                    response.Message = $"There is no Icon with Name: {model.IconName}.";
+                    ITLogger.LogError($"There is no Icon with Name: {model.IconName}.");
+                    return response;
+                }
+
                 //need actual Item Template object now, not ItemTemplateDTO.
                 var updatedItemTemplate = await Context
                         .ItemTemplates
@@ -400,8 +418,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                 updatedItemTemplate.Brand = model.Brand ?? updatedItemTemplate.Brand;
                 updatedItemTemplate.Description = model.Description ?? updatedItemTemplate.Description;
                 updatedItemTemplate.ExpirationDays = model.ExpirationDays;
-                updatedItemTemplate.Icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync() ??
-                        new IconModel() { Name = model.IconName, Path = model.IconPath };
+                updatedItemTemplate.Icon = icon;
                 //add pre-existing item tags from model
                 updatedItemTemplate.ItemTags = await Context.ItemTags
                         .Where(it => model.ItemTagNames
@@ -474,6 +491,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                                 it.Brand == brand)
                         .FirstOrDefaultAsync();
 
+                activatedStatusItemTemplate.DeletedDate = DateTime.MaxValue;
                 activatedStatusItemTemplate.Status = Status.active;
 
                 Context.ItemTemplates.Update(activatedStatusItemTemplate);
@@ -518,6 +536,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                                 it.Brand == brand)
                         .FirstOrDefaultAsync();
 
+                deletedStatusItemTemplate.DeletedDate = DateTime.Today;
                 deletedStatusItemTemplate.Status = Status.deleted;
 
                 Context.ItemTemplates.Update(deletedStatusItemTemplate);

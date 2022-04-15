@@ -9,7 +9,6 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.DTO
         public string Description { get; set; }
         public int ExpirationDays { get; set; }
         public string IconName { get; set; }
-        public string IconPath { get; set; }
         public List<string> ItemTagNames { get; set; }
     }
 }

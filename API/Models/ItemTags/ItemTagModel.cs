@@ -1,7 +1,6 @@
 ﻿using KitchenManager.API.ItemsNS;
 using KitchenManager.API.SharedNS.StatusNS;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 
 namespace KitchenManager.API.ItemTagsNS
 {

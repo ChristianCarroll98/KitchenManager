@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
+﻿namespace KitchenManager.API.ItemsNS.ItemTemplatesNS
 {
     public class ItemTemplateModel : ItemModel
     {

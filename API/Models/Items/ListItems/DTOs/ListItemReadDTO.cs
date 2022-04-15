@@ -14,15 +14,15 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.DTO
         public string IconPath { get; set; }
         public List<string> ItemTagNames { get; set; }
 
-        public ListItemReadDTO(ListItemModel listItem = null)
+        public ListItemReadDTO(ListItemModel listItem)
         {
-            Name = listItem.Name ?? string.Empty;
-            Brand = listItem.Brand ?? string.Empty;
-            Description = listItem.Description ?? string.Empty;
-            Quantity = listItem == null ? 1 : listItem.Quantity;
-            ExpirationDate = listItem == null ? DateTime.MaxValue : listItem.ExpirationDate;
-            IconPath = listItem.Icon.Path ?? string.Empty;
-            ItemTagNames = listItem.ItemTags.Select(it => it.Name).ToList() ?? new List<string>();
+            Name = listItem.Name;
+            Brand = listItem.Brand;
+            Description = listItem.Description;
+            Quantity = listItem.Quantity;
+            ExpirationDate = listItem.ExpirationDate;
+            IconPath = listItem.Icon == null ? "Null Path" : listItem.Icon.Path;
+            ItemTagNames = listItem.ItemTags.Select(it => it.Name).ToList();
         }
     }
 }
