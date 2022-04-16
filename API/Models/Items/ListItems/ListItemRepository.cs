@@ -56,7 +56,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                         .Where(li => li.Id == id)
                         .FirstOrDefaultAsync();
 
-                if (listItem == null)
+                if (listItem is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find List Item with the specified Id.";
@@ -150,7 +150,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                                 li.Brand == brand)
                         .FirstOrDefaultAsync();
 
-                if (listItem == null)
+                if (listItem is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find List Item with Name: {name} and Brand: {brand}.";
@@ -345,7 +345,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 
                 var icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync();
 
-                if (icon == null)
+                if (icon is null)
                 {
                     response.Success = false;
                     response.Message = $"There is no Icon with Name: {model.IconName}.";
@@ -402,7 +402,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                                 it.Brand == model.Brand)
                         .FirstOrDefaultAsync();
 
-                if (checkItemTemplate == null)
+                if (checkItemTemplate is null)
                 {
                     //create item template from item since it was not previously a template.
                     var newItemTemplate = new ItemTemplateModel()
@@ -424,7 +424,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                                 it.Brand == model.Brand)
                         .FirstOrDefaultAsync();
 
-                    if (checkItemTemplate == null)
+                    if (checkItemTemplate is null)
                     {
                         response.Success = false;
                         response.Message = $"Failed to save the new Item Template from List Item. Message: {checkAdded.Message}";
@@ -481,7 +481,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                                 it.Brand == itemTemplateBrand)
                         .FirstOrDefaultAsync();
 
-                if (itemTemplate == null)
+                if (itemTemplate is null)
                 {
                     response.Success = false;
                     response.Message = $"There is no Item Template with Name: {itemTemplateName} and Brand: {itemTemplateBrand}.";
@@ -563,7 +563,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
 
                 var icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync();
 
-                if (icon == null)
+                if (icon is null)
                 {
                     response.Success = false;
                     response.Message = $"There is no Icon with Name: {model.IconName}.";
@@ -893,7 +893,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                             .Where(u => u.NormalizedEmail == userEmail.ToUpperInvariant())
                             .FirstOrDefaultAsync();
 
-                if (user == null)
+                if (user is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find a User with the specified email address.";
@@ -907,7 +907,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.Repo
                                 ul.Name == userListName)
                         .FirstOrDefaultAsync();
 
-                if (userList == null)
+                if (userList is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find a User List with Name: {userListName} for this user.";

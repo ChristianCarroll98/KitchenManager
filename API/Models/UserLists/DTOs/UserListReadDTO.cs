@@ -8,7 +8,7 @@
 
         public UserListReadDTO(UserListModel userList)
         {
-            Name = userList.Name ?? string.Empty;
+            Name = userList.Name;
             Description = userList.Description ?? string.Empty;
             IconPath = userList.Icon.Path ?? string.Empty;
         }

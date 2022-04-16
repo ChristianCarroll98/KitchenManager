@@ -21,7 +21,7 @@ namespace KitchenManager.API.ItemsNS.ListItemsNS.DTO
             Description = listItem.Description;
             Quantity = listItem.Quantity;
             ExpirationDate = listItem.ExpirationDate;
-            IconPath = listItem.Icon == null ? "Null Path" : listItem.Icon.Path;
+            IconPath = listItem.Icon is null ? "Null Path" : listItem.Icon.Path;
             ItemTagNames = listItem.ItemTags.Select(it => it.Name).ToList();
         }
     }

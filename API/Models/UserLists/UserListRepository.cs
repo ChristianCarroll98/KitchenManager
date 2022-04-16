@@ -49,7 +49,7 @@ namespace KitchenManager.API.UserListsNS.Repo
                         .Where(ul => ul.Id == id)
                         .FirstOrDefaultAsync();
 
-                if (userList == null)
+                if (userList is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find User List with the specified Id.";
@@ -83,7 +83,7 @@ namespace KitchenManager.API.UserListsNS.Repo
                                     u.Status == Status.active)
                             .FirstOrDefaultAsync();
 
-                if (user == null)
+                if (user is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find a User with the specified email address.";
@@ -97,7 +97,7 @@ namespace KitchenManager.API.UserListsNS.Repo
                                 ul.Name == name)
                         .FirstOrDefaultAsync();
 
-                if (userList == null)
+                if (userList is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find User List named {name} for User with Email: {userEmail}.";
@@ -131,7 +131,7 @@ namespace KitchenManager.API.UserListsNS.Repo
                                     u.Status == Status.active)
                             .FirstOrDefaultAsync();
 
-                if (user == null)
+                if (user is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find a User with the specified email address.";
@@ -180,7 +180,7 @@ namespace KitchenManager.API.UserListsNS.Repo
                                     u.Status == Status.active)
                             .FirstOrDefaultAsync();
 
-                if (user == null)
+                if (user is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find a User with the specified email address.";
@@ -228,7 +228,7 @@ namespace KitchenManager.API.UserListsNS.Repo
                                     u.Status == Status.active)
                             .FirstOrDefaultAsync();
 
-                if (user == null)
+                if (user is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find a User with the specified email address.";
@@ -249,7 +249,7 @@ namespace KitchenManager.API.UserListsNS.Repo
 
                 var icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync();
 
-                if (icon == null)
+                if (icon is null)
                 {
                     response.Success = false;
                     response.Message = $"There is no Icon with Name: {model.IconName}.";
@@ -303,7 +303,7 @@ namespace KitchenManager.API.UserListsNS.Repo
                                     u.Status == Status.active)
                             .FirstOrDefaultAsync();
 
-                if (user == null)
+                if (user is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find a User with the specified email address.";
@@ -323,7 +323,7 @@ namespace KitchenManager.API.UserListsNS.Repo
 
                 var icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync();
 
-                if (icon == null)
+                if (icon is null)
                 {
                     response.Success = false;
                     response.Message = $"There is no Icon with Name: {model.IconName}.";
@@ -369,7 +369,7 @@ namespace KitchenManager.API.UserListsNS.Repo
                                     u.Status == Status.active)
                             .FirstOrDefaultAsync();
 
-                if (user == null)
+                if (user is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find a User with the specified email address.";
@@ -425,7 +425,7 @@ namespace KitchenManager.API.UserListsNS.Repo
                                     u.Status == Status.active)
                             .FirstOrDefaultAsync();
 
-                if (user == null)
+                if (user is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find a User with the specified email address.";
@@ -481,7 +481,7 @@ namespace KitchenManager.API.UserListsNS.Repo
                                     u.Status == Status.active)
                             .FirstOrDefaultAsync();
 
-                if (user == null)
+                if (user is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find a User with the specified email address.";

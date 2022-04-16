@@ -53,7 +53,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                         .Where(it => it.Id == id)
                         .FirstOrDefaultAsync();
 
-                if(itemTemplate == null)
+                if(itemTemplate is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find Item Template with the specified Id.";
@@ -162,7 +162,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
                                 it.Brand == brand) //dont check for active here so I can update from inactive to active.
                         .FirstOrDefaultAsync();
 
-                if (itemTemplate == null)
+                if (itemTemplate is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find Item Template with Name: {name} and Brand: {brand}";
@@ -316,7 +316,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
 
                 var icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync();
 
-                if (icon == null)
+                if (icon is null)
                 {
                     response.Success = false;
                     response.Message = $"There is no Icon with Name: {model.IconName}.";
@@ -397,7 +397,7 @@ namespace KitchenManager.API.ItemsNS.ItemTemplatesNS.Repo
 
                 var icon = await Context.Icons.Where(i => i.Name == model.IconName).FirstOrDefaultAsync();
 
-                if (icon == null)
+                if (icon is null)
                 {
                     response.Success = false;
                     response.Message = $"There is no Icon with Name: {model.IconName}.";

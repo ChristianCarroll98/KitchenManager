@@ -30,33 +30,6 @@ namespace KitchenManager.API.Data
             base.OnModelCreating(builder);
 
             //Settings for Identity classes (int for Id column and table names)
-            /*builder.Entity<IdentityUserRole<int>>(b =>
-            {
-                b.ToTable("UserRoles");
-            });
-
-            builder.Entity<IdentityRole<int>>(b => 
-            {
-                b.Property(role => role.ConcurrencyStamp)
-                   .IsUnicode(false)
-                   .IsFixedLength(true)
-                   .HasMaxLength(36)
-                   .IsRequired(true);
-
-                b.ToTable("Roles");
-            });
-
-            builder.Entity<IdentityRoleClaim<int>>(b => 
-            {
-                b.Property(roleClaim => roleClaim.ClaimType)
-                    .HasMaxLength(256);
-
-                b.Property(roleClaim => roleClaim.ClaimValue)
-                    .HasMaxLength(256);
-
-                b.ToTable("RoleClaims");
-            });*/
-
             builder.Entity<IdentityUserClaim<int>>(b =>
             {
                 b.Property(userClaim => userClaim.ClaimType)

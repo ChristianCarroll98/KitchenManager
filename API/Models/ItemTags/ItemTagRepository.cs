@@ -43,7 +43,7 @@ namespace KitchenManager.API.ItemTagsNS.Repo
                         .Where(it => it.Id == id)
                         .FirstOrDefaultAsync();
 
-                if (itemTag == null)
+                if (itemTag is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find Item Tag with the specified Id.";
@@ -77,7 +77,7 @@ namespace KitchenManager.API.ItemTagsNS.Repo
                         .Where(it => it.Name == name)
                         .FirstOrDefaultAsync();
 
-                if (itemTag == null)
+                if (itemTag is null)
                 {
                     response.Success = false;
                     response.Message = $"Could not find Item Tag with Name: {name}.";
@@ -225,7 +225,7 @@ namespace KitchenManager.API.ItemTagsNS.Repo
             {
                 ResponseModel<string> verifyPreExisting = await RetrieveByName(name);
 
-                if (verifyPreExisting.Data == null)
+                if (verifyPreExisting.Data is null)
                 {
                     response.Success = false;
                     response.Message = $"Failed to find Item Tag with Name: {name} to permanently delete.";
