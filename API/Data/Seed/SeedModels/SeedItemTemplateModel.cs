@@ -1,6 +1,6 @@
 ﻿namespace KitchenManager.API.Data.Seed
 {
-    public class ItemTemplateSeedModel
+    public class SeedItemTemplateModel
     {
         public string Name { get; set; }
         public string Brand { get; set; }

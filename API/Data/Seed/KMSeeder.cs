@@ -16,8 +16,7 @@ using KitchenManager.API.UsersNS;
 using KitchenManager.API.UserListsNS;
 using KitchenManager.API.SharedNS.StatusNS;
 using KitchenManager.API.IconsNS;
-using KitchenManager.API.SharedNS.ClaimValuesNS;
-using KitchenManager.API.SharedNS.ClaimTypesNS;
+using KitchenManager.API.SharedNS.ClaimsNS;
 
 namespace KitchenManager.API.Data.Seed
 {
@@ -53,157 +52,26 @@ namespace KitchenManager.API.Data.Seed
 
             if (!Context.Users.Any())
             {
-                //Add myself as Super Admin
-                var myEmail = "christiancarrollofficial@gmail.com";
-                UserModel superAdmin = await UserManager.FindByEmailAsync(myEmail);
-                if (superAdmin is null)
-                {
-                    superAdmin = new UserModel()
-                    {
-                        UserName = myEmail,
-                        Email = myEmail,
-                        NormalizedEmail = myEmail.Normalize(),
-                        PhoneNumber = "512-550-7897"
-                    };
-
-                    var result = await UserManager.CreateAsync(superAdmin, "Password!1");
-                    if (result != IdentityResult.Success)
-                    {
-                        throw new InvalidOperationException("Could not create a new Super Admin in seeder: " + result.ToString());
-                    }
-
-                    var newSuperAdmin = await UserManager.FindByEmailAsync(superAdmin.Email);
-                    if (newSuperAdmin is null)
-                    {
-                        throw new InvalidOperationException("Cant find new Super Admin in seeder");
-                    }
-
-                    await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                    {
-                        UserId = newSuperAdmin.Id,
-                        ClaimType = KMClaimTypes.Role,
-                        ClaimValue = KMClaimValues.SuperAdmin
-                    });
-
-                    await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                    {
-                        UserId = newSuperAdmin.Id,
-                        ClaimType = KMClaimTypes.Role,
-                        ClaimValue = KMClaimValues.Admin
-                    });
-
-                    await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                    {
-                        UserId = newSuperAdmin.Id,
-                        ClaimType = KMClaimTypes.Role,
-                        ClaimValue = KMClaimValues.User
-                    });
-
-                    await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                    {
-                        UserId = newSuperAdmin.Id,
-                        ClaimType = KMClaimTypes.EmailConfirmationStatus,
-                        ClaimValue = KMClaimValues.EmailConfirmed,
-                    });
-
-                    await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                    {
-                        UserId = newSuperAdmin.Id,
-                        ClaimType = KMClaimTypes.FirstName,
-                        ClaimValue = "Christian"
-                    });
-
-                    await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                    {
-                        UserId = newSuperAdmin.Id,
-                        ClaimType = KMClaimTypes.LastName,
-                        ClaimValue = "Carroll"
-                    });
-                }
-
-                //Add Admins
-                var filePathAdmin = Path.Combine(RootPath, "API/Data/Seed/SeedData/SeedAdmins.json");
-                var jsonAdmin = File.ReadAllText(filePathAdmin);
-                var adminData = JsonSerializer.Deserialize<IEnumerable<UserSeedModel>>(jsonAdmin);
-
-                foreach (var adminSeedModel in adminData)
-                {
-                    UserModel admin = await UserManager.FindByEmailAsync(adminSeedModel.Email);
-                    if (admin is null)
-                    {
-                        admin = new UserModel()
-                        {
-                            UserName = adminSeedModel.Email,
-                            Email = adminSeedModel.Email,
-                            NormalizedEmail = adminSeedModel.Email.Normalize(),
-                            PhoneNumber = $"{Random.Next(100, 1000)}-{Random.Next(100, 1000)}-{Random.Next(1000, 10000)}"
-                        };
-
-                        var result = await UserManager.CreateAsync(admin, "Password!1");
-                        if (result != IdentityResult.Success)
-                        {
-                            throw new InvalidOperationException("Could not create a new Admin in seeder: " + result.ToString());
-                        }
-
-                        var newAdmin = await UserManager.FindByEmailAsync(admin.Email);
-                        if (newAdmin is null)
-                        {
-                            throw new InvalidOperationException("Cant find new Admin in seeder");
-                        }
-
-                        await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                        {
-                            UserId = newAdmin.Id,
-                            ClaimType = KMClaimTypes.Role,
-                            ClaimValue = KMClaimValues.Admin
-                        });
-
-                        await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                        {
-                            UserId = newAdmin.Id,
-                            ClaimType = KMClaimTypes.Role,
-                            ClaimValue = KMClaimValues.User
-                        });
-
-                        await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                        {
-                            UserId = newAdmin.Id,
-                            ClaimType = KMClaimTypes.EmailConfirmationStatus,
-                            ClaimValue = KMClaimValues.EmailConfirmed,
-                        });
-
-                        await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                        {
-                            UserId = newAdmin.Id,
-                            ClaimType = KMClaimTypes.FirstName,
-                            ClaimValue = adminSeedModel.FirstName
-                        });
-
-                        await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                        {
-                            UserId = newAdmin.Id,
-                            ClaimType = KMClaimTypes.LastName,
-                            ClaimValue = adminSeedModel.LastName
-                        });
-                    }
-                }
-
                 //Add Users
                 var filePathUser = Path.Combine(RootPath, "API/Data/Seed/SeedData/SeedUsers.json");
                 var jsonUser = File.ReadAllText(filePathUser);
-                var userData = JsonSerializer.Deserialize<IEnumerable<UserSeedModel>>(jsonUser);
+                var userData = JsonSerializer.Deserialize<IEnumerable<SeedUserModel>>(jsonUser);
 
-                foreach (var userSeedModel in userData)
+                foreach (var seedUserModel in userData)
                 {
-                    UserModel user = await UserManager.FindByEmailAsync(userSeedModel.Email);
+                    UserModel user = await UserManager.FindByEmailAsync(seedUserModel.Email);
                     if (user is null)
                     {
                         user = new UserModel()
                         {
-                            UserName = userSeedModel.Email,
-                            Email = userSeedModel.Email,
-                            NormalizedEmail = userSeedModel.Email.Normalize(),
-                            PhoneNumber = $"{Random.Next(100, 1000)}-{Random.Next(100, 1000)}-{Random.Next(1000, 10000)}"
+                            UserName = seedUserModel.Email,
+                            Email = seedUserModel.Email,
+                            NormalizedEmail = seedUserModel.Email.ToUpperInvariant(),
+                            NormalizedUserName = seedUserModel.Email.ToUpperInvariant(),
+                            PhoneNumber = $"{Random.Next(100, 1000)}-{Random.Next(100, 1000)}-{Random.Next(1000, 10000)}",
+                            FirstName = seedUserModel.FirstName,
+                            LastName = seedUserModel.LastName,
+                            Birthday = DateTime.Today.AddDays(-Random.Next(18*365, 65*365))
                         };
 
                         var result = await UserManager.CreateAsync(user, "Password!1");
@@ -218,32 +86,31 @@ namespace KitchenManager.API.Data.Seed
                             throw new InvalidOperationException("Cant find new User in seeder");
                         }
 
+                        if (seedUserModel.Role == KMRoleClaimValues.SuperAdmin)
+                        {
+                            await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
+                            {
+                                UserId = newUser.Id,
+                                ClaimType = KMClaimTypes.Role,
+                                ClaimValue = KMRoleClaimValues.SuperAdmin
+                            });
+                        }
+
+                        if (seedUserModel.Role == KMRoleClaimValues.SuperAdmin || seedUserModel.Role == KMRoleClaimValues.Admin)
+                        {
+                            await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
+                            {
+                                UserId = newUser.Id,
+                                ClaimType = KMClaimTypes.Role,
+                                ClaimValue = KMRoleClaimValues.Admin
+                            });
+                        }
+
                         await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
                         {
                             UserId = newUser.Id,
                             ClaimType = KMClaimTypes.Role,
-                            ClaimValue = KMClaimValues.User
-                        });
-
-                        await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                        {
-                            UserId = newUser.Id,
-                            ClaimType = KMClaimTypes.EmailConfirmationStatus,
-                            ClaimValue = KMClaimValues.EmailConfirmed,
-                        });
-
-                        await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                        {
-                            UserId = newUser.Id,
-                            ClaimType = KMClaimTypes.FirstName,
-                            ClaimValue = userSeedModel.FirstName
-                        });
-
-                        await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                        {
-                            UserId = newUser.Id,
-                            ClaimType = KMClaimTypes.LastName,
-                            ClaimValue = userSeedModel.LastName
+                            ClaimValue = KMRoleClaimValues.User
                         });
                     }
                 }
@@ -284,7 +151,7 @@ namespace KitchenManager.API.Data.Seed
                 //Add ItemTemplates
                 var filePathItemTemplate = Path.Combine(RootPath, "API/Data/Seed/SeedData/SeedItemTemplates.json");
                 var jsonItemTemplate = File.ReadAllText(filePathItemTemplate);
-                var itemTemplateData = JsonSerializer.Deserialize<IEnumerable<ItemTemplateSeedModel>>(jsonItemTemplate);
+                var itemTemplateData = JsonSerializer.Deserialize<IEnumerable<SeedItemTemplateModel>>(jsonItemTemplate);
 
                 foreach (var itemTemplateSeedModel in itemTemplateData)
                 {

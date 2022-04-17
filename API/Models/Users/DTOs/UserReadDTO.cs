@@ -1,8 +1,4 @@
-﻿using KitchenManager.API.UserListsNS.DTO;
-using Microsoft.AspNetCore.Identity;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
+﻿using System;
 
 namespace KitchenManager.API.UsersNS.DTO
 {
@@ -12,13 +8,15 @@ namespace KitchenManager.API.UsersNS.DTO
         public string PhoneNumber { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public DateTime Birthday { get; set; }
 
-        public UserReadDTO(UserModel user, string firstName, string lastName)
+        public UserReadDTO(UserModel user)
         {
             Email = user.Email;
-            PhoneNumber = user.PhoneNumber ?? string.Empty;
-            FirstName = firstName;
-            LastName = lastName;
+            PhoneNumber = user.PhoneNumber;
+            FirstName = user.FirstName;
+            LastName = user.LastName;
+            Birthday = user.Birthday;
         }
     }
 }

@@ -1,102 +1,146 @@
 [
     {
+        "FirstName": "Christian",
+        "LastName": "Carroll",
+        "Email": "christiancarrollofficial@gmail.com",
+        "Role": "Super Admin"
+    },
+    {
+        "FirstName": "Paulette",
+        "LastName": "Hunter",
+        "Email": "paulette.hunter@pharmacon.id",
+        "Role": "Admin"
+    },
+    {
+        "FirstName": "Flores",
+        "LastName": "Langley",
+        "Email": "flores.langley@solgan.schmidt",
+        "Role": "Admin"
+    },
+    {
+        "FirstName": "Walter",
+        "LastName": "Schneider",
+        "Email": "walter.schneider@isonus.viajes",
+        "Role": "Admin"
+    },
+    {
         "FirstName": "Hudson",
         "LastName": "Tanner",
-        "Email": "hudson.tanner@earthplex.td"
+        "Email": "hudson.tanner@earthplex.td",
+        "Role": "User"
     },
     {
         "FirstName": "Greene",
         "LastName": "Mccray",
-        "Email": "greene.mccray@fangold.jetzt"
+        "Email": "greene.mccray@fangold.jetzt",
+        "Role": "User"
     },
     {
         "FirstName": "Young",
         "LastName": "Salinas",
-        "Email": "young.salinas@comvex.koeln"
+        "Email": "young.salinas@comvex.koeln",
+        "Role": "User"
     },
     {
         "FirstName": "Edward",
         "LastName": "Abbott",
-        "Email": "edward.abbott@vidto.mz"
+        "Email": "edward.abbott@vidto.mz",
+        "Role": "User"
     },
     {
         "FirstName": "Manuela",
         "LastName": "Morris",
-        "Email": "manuela.morris@geekosis.prod"
+        "Email": "manuela.morris@geekosis.prod",
+        "Role": "User"
     },
     {
         "FirstName": "Conner",
         "LastName": "Greene",
-        "Email": "conner.greene@ontagene.seat"
+        "Email": "conner.greene@ontagene.seat",
+        "Role": "User"
     },
     {
         "FirstName": "Coffey",
         "LastName": "Duffy",
-        "Email": "coffey.duffy@zomboid.care"
+        "Email": "coffey.duffy@zomboid.care",
+        "Role": "User"
     },
     {
         "FirstName": "Camacho",
         "LastName": "Hyde",
-        "Email": "camacho.hyde@furnigeer.al"
+        "Email": "camacho.hyde@furnigeer.al",
+        "Role": "User"
     },
     {
         "FirstName": "Sandra",
         "LastName": "Wagner",
-        "Email": "sandra.wagner@zilphur.corsica"
+        "Email": "sandra.wagner@zilphur.corsica",
+        "Role": "User"
     },
     {
         "FirstName": "Valentine",
         "LastName": "Schwartz",
-        "Email": "valentine.schwartz@netagy.tm"
+        "Email": "valentine.schwartz@netagy.tm",
+        "Role": "User"
     },
     {
         "FirstName": "Cleo",
         "LastName": "Stuart",
-        "Email": "cleo.stuart@caxt.ax"
+        "Email": "cleo.stuart@caxt.ax",
+        "Role": "User"
     },
     {
         "FirstName": "Beth",
         "LastName": "Middleton",
-        "Email": "beth.middleton@eyewax.vn"
+        "Email": "beth.middleton@eyewax.vn",
+        "Role": "User"
     },
     {
         "FirstName": "Cindy",
         "LastName": "Glass",
-        "Email": "cindy.glass@cormoran.taxi"
+        "Email": "cindy.glass@cormoran.taxi",
+        "Role": "User"
     },
     {
         "FirstName": "Tamara",
         "LastName": "Morrison",
-        "Email": "tamara.morrison@xoggle.market"
+        "Email": "tamara.morrison@xoggle.market",
+        "Role": "User"
     },
     {
         "FirstName": "Robin",
         "LastName": "Flynn",
-        "Email": "robin.flynn@eschoir.nissan"
+        "Email": "robin.flynn@eschoir.nissan",
+        "Role": "User"
     },
     {
         "FirstName": "Lillian",
         "LastName": "Sims",
-        "Email": "lillian.sims@minga.post"
+        "Email": "lillian.sims@minga.post",
+        "Role": "User"
     },
     {
         "FirstName": "Jeanie",
         "LastName": "Calderon",
-        "Email": "jeanie.calderon@multron.amsterdam"
+        "Email": "jeanie.calderon@multron.amsterdam",
+        "Role": "User"
     },
     {
         "FirstName": "Davidson",
         "LastName": "Hancock",
-        "Email": "davidson.hancock@pyramis.report"
+        "Email": "davidson.hancock@pyramis.report",
+        "Role": "User"
     },
     {
         "FirstName": "Mariana",
         "LastName": "Luna",
-        "Email": "mariana.luna@xth.dog"
+        "Email": "mariana.luna@xth.dog",
+        "Role": "User"
     },
     {
         "FirstName": "Esther",
         "LastName": "Myers",
-        "Email": "esther.myers@zoinage.wtc"
+        "Email": "esther.myers@zoinage.wtc",
+        "Role": "User"
     }
 ]
