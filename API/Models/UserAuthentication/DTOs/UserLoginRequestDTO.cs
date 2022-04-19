@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace KitchenManager.API.UsersNS.Login
+namespace KitchenManager.API.UserAuthNS.DTO
 {
     public class UserLoginRequestDTO
     {

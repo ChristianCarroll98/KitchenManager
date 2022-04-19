@@ -1,4 +1,5 @@
-﻿using KitchenManager.API.Data;
+﻿using FluentEmail.Core;
+using KitchenManager.API.Data;
 using KitchenManager.API.SharedNS.ClaimsNS;
 using KitchenManager.API.SharedNS.ResponseNS;
 using KitchenManager.API.SharedNS.StatusNS;
@@ -59,10 +60,8 @@ namespace KitchenManager.API.UsersNS.Repo
 
             try
             {
-                var user = await Context
-                        .Users
-                        .Where(u => u.Id == id)
-                        .FirstOrDefaultAsync();
+
+                var user = await UserManager.FindByIdAsync(id.ToString());
 
                 if (user is null)
                 {
@@ -158,13 +157,9 @@ namespace KitchenManager.API.UsersNS.Repo
 
             try
             {
-                //this gets a list of strings of the actual property names in code, not values.
-                //var properties = typeof(KMRoleClaimValues).GetMembers().Where(p => p.MemberType == System.Reflection.MemberTypes.Field).Select(p => p.Name).ToList();
-                
-                var roles = new List<string>();
                 var users = new List<UserModel>();
 
-                if (role == string.Empty || role is null)
+                if (string.IsNullOrWhiteSpace(role))
                 {
                     users = await Context
                                 .Users
@@ -173,12 +168,19 @@ namespace KitchenManager.API.UsersNS.Repo
                                                uc.ClaimType == KMClaimTypes.Role) &&
                                        user.Status == Status.active)
                                 .ToListAsync();
+
+                    if (!users.Any())
+                    {
+                        response.Success = false;
+                        response.Message = $"Could not find any Users with no Role.";
+                        ULogger.LogError($"Could not find any Users with no Role.");
+                        return response;
+                    }
                 }
                 else
                 {
                     //this gets list of strings of the values of the properties.
-                    roles = typeof(KMRoleClaimValues).GetFields().Select(f => f.GetValue(f).ToString().ToUpperInvariant()).ToList();
-
+                    var roles = typeof(KMRoleClaimValues).GetFields().Select(f => f.GetValue(f).ToString().ToUpperInvariant()).ToList();
                     if (!roles.Contains(role.ToUpperInvariant()))
                     {
                         response.Success = false;
@@ -195,14 +197,14 @@ namespace KitchenManager.API.UsersNS.Repo
                                            uc.ClaimValue == role) &&
                                    user.Status == Status.active)
                             .ToListAsync();
-                }
 
-                if (!users.Any())
-                {
-                    response.Success = false;
-                    response.Message = $"Could not find any Users with Role: {role}.";
-                    ULogger.LogError($"Could not find any Users with Role: {role}.");
-                    return response;
+                    if (!users.Any())
+                    {
+                        response.Success = false;
+                        response.Message = $"Could not find any Users with Role: {role}.";
+                        ULogger.LogError($"Could not find any Users with Role: {role}.");
+                        return response;
+                    }
                 }
 
                 response.Data = users.Select(user => new UserReadDTO(user)).ToList();
@@ -289,6 +291,7 @@ namespace KitchenManager.API.UsersNS.Repo
                 };
 
                 var result = await UserManager.CreateAsync(user, model.Password);
+                
                 await Context.SaveChangesAsync();
 
                 ResponseModel<UserReadDTO> checkAdded = await RetrieveByEmailAddress(model.Email);
@@ -300,49 +303,19 @@ namespace KitchenManager.API.UsersNS.Repo
                     ULogger.LogError($"Failed to save new User with Email: {model.Email} to Database. Message: {checkAdded.Message} Errors: {string.Join("; ", result.Errors.Select(e => $"{e.Code}: {e.Description}"))}");
                     return response;
                 }
+                
+                var assignRoleResponse = await AssignRole(model.Email, model.Role);
 
-                var newUser = await UserManager.FindByEmailAsync(model.Email);
+                response.Data = assignRoleResponse.Data;
 
-                var roles = typeof(KMRoleClaimValues).GetFields().Select(f => f.GetValue(f).ToString().ToUpperInvariant()).ToList();
-
-                if (!roles.Contains(model.Role.ToUpperInvariant()))
+                if (!assignRoleResponse.Success)
                 {
                     response.Success = false;
-                    response.Message = $"Invalid Role Name: {model.Role}. Role unassigned.";
-                    ULogger.LogError($"Invalid Role Name: {model.Role}. Role unassigned.");
+                    response.Message = $"New User saved, however Error occured while setting role. Message: {assignRoleResponse.Message}";
                     return response;
                 }
 
-                if (model.Role == KMRoleClaimValues.SuperAdmin)
-                {
-                    await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                    {
-                        UserId = newUser.Id,
-                        ClaimType = KMClaimTypes.Role,
-                        ClaimValue = KMRoleClaimValues.SuperAdmin
-                    });
-                }
-
-                if (model.Role == KMRoleClaimValues.SuperAdmin || model.Role == KMRoleClaimValues.Admin)
-                {
-                    await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                    {
-                        UserId = newUser.Id,
-                        ClaimType = KMClaimTypes.Role,
-                        ClaimValue = KMRoleClaimValues.Admin
-                    });
-                }
-
-                await Context.UserClaims.AddAsync(new IdentityUserClaim<int>()
-                {
-                    UserId = newUser.Id,
-                    ClaimType = KMClaimTypes.Role,
-                    ClaimValue = KMRoleClaimValues.User
-                });
-
                 await Context.SaveChangesAsync();
-
-                response.Data = checkAdded.Data;
             }
             catch (Exception ex)
             {
@@ -402,7 +375,6 @@ namespace KitchenManager.API.UsersNS.Repo
 
         public async Task<ResponseModel<UserReadDTO>> AssignRole(string emailAddress, string role)
         {
-            ///TODO not changing role to admin?
             var response = new ResponseModel<UserReadDTO>();
 
             try
@@ -421,7 +393,7 @@ namespace KitchenManager.API.UsersNS.Repo
 
                 var roles = typeof(KMRoleClaimValues).GetFields().Select(f => f.GetValue(f).ToString().ToUpperInvariant()).ToList();
 
-                if (role == string.Empty || role is null || !roles.Contains(role.ToUpperInvariant()))
+                if (string.IsNullOrWhiteSpace(role) || !roles.Contains(role.ToUpperInvariant()))
                 {
                     response.Success = false;
                     response.Message = $"Invalid Role Name: {role}. Role unchanged.";
@@ -430,7 +402,7 @@ namespace KitchenManager.API.UsersNS.Repo
                 }
 
                 //clear roles
-                Context.UserClaims.RemoveRange(Context.UserClaims.Where(uc => uc.ClaimType == KMClaimTypes.Role && uc.UserId == user.Id));
+                Context.UserClaims.RemoveRange(Context.UserClaims.Where(uc => uc.ClaimType == KMClaimTypes.Role && uc.UserId == user.Id).AsEnumerable());
 
                 await Context.SaveChangesAsync();
 

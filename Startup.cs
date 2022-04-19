@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Identity;
 
 using KitchenManager.API.UsersNS;
 using KitchenManager.API.Data;
@@ -16,6 +15,7 @@ using KitchenManager.API.ItemsNS.ListItemsNS.Repo;
 using KitchenManager.API.ItemTagsNS.Repo;
 using KitchenManager.API.UserListsNS.Repo;
 using KitchenManager.API.UsersNS.Repo;
+using KitchenManager.API.UserAuthNS.Repo;
 
 namespace KitchenManager
 {
@@ -31,15 +31,28 @@ namespace KitchenManager
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddIdentity<UserModel, IdentityRole<int>>(options =>
+            services.AddIdentityCore<UserModel>(options =>
             {
                 options.User.RequireUniqueEmail = true;
-            }).AddEntityFrameworkStores<KMDbContext>();
+                options.Password.RequiredLength = 8;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireDigit = true;
+
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = System.TimeSpan.FromMinutes(5);
+            })
+                .AddEntityFrameworkStores<KMDbContext>();
 
             services.AddDbContext<KMDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("KMData"));
             });
+
+            //services.ConfigureApplicationCookie(options =>
+            //{
+                
+            //});
 
             services.AddTransient<KMSeeder>();
 
@@ -47,6 +60,7 @@ namespace KitchenManager
             services.AddScoped<IListItemRepository, ListItemRepository>();
             services.AddScoped<IItemTagRepository, ItemTagRepository>();
             services.AddScoped<IUserListRepository, UserListRepository>();
+            services.AddScoped<IUserAuthenticationRepository, UserAuthenticationRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
 
             services.AddControllersWithViews()
@@ -55,6 +69,10 @@ namespace KitchenManager
                     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                     options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
                 });
+
+            services
+                .AddFluentEmail("defaultsender@test.test")
+                .AddSmtpSender("localhost", 25);
 
             services.AddSwaggerGen(c =>
             {
@@ -92,12 +110,13 @@ namespace KitchenManager
             });
 
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
+            //app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
-            app.UseAuthentication();
-
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

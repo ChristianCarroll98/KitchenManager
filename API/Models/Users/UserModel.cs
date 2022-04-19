@@ -22,8 +22,8 @@ namespace KitchenManager.API.UsersNS
             //disabling confirming email/phone number, lockout, and 2fa for now
             EmailConfirmed = true;
             PhoneNumberConfirmed = true;
-            TwoFactorEnabled = false;
-            LockoutEnabled = false;
+            //TwoFactorEnabled = false;
+            //LockoutEnabled = false;
         }
         /*
          * Create:

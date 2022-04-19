@@ -13,12 +13,12 @@ namespace KitchenManager.API.UsersNS
     public class UserController : ControllerBase
     {
         private readonly IUserRepository URepo;
-        private readonly ILogger<UserController> ULLogger;
+        private readonly ILogger<UserController> ULogger;
 
-        public UserController(IUserRepository uRepo, ILogger<UserController> uLLogger)
+        public UserController(IUserRepository uRepo, ILogger<UserController> uLogger)
         {
             URepo = uRepo;
-            ULLogger = uLLogger;
+            ULogger = uLogger;
         }
 
         [Route("RetrieveById")]
@@ -33,7 +33,7 @@ namespace KitchenManager.API.UsersNS
             }
             catch (Exception ex)
             {
-                ULLogger.LogError($"Failed to retrieve User with Id: {id}. Message: {ex.Message}");
+                ULogger.LogError($"Failed to retrieve User with Id: {id}. Message: {ex.Message}");
                 return BadRequest($"Failed to retrieve User with the specified Id.");
             }
         }
@@ -50,7 +50,7 @@ namespace KitchenManager.API.UsersNS
             }
             catch (Exception ex)
             {
-                ULLogger.LogError($"Failed to retrieve User with Email: {email}. Message: {ex.Message}");
+                ULogger.LogError($"Failed to retrieve User with Email: {email}. Message: {ex.Message}");
                 return BadRequest($"Failed to retrieve User with Email: {email}.");
             }
         }
@@ -67,7 +67,7 @@ namespace KitchenManager.API.UsersNS
             }
             catch (Exception ex)
             {
-                ULLogger.LogError($"Failed to retrieve Users with status: {status.ToString()}. Message: {ex.Message}");
+                ULogger.LogError($"Failed to retrieve Users with status: {status.ToString()}. Message: {ex.Message}");
                 return BadRequest($"Failed to retrieve Users with the specified status.");
             }
         }
@@ -84,7 +84,7 @@ namespace KitchenManager.API.UsersNS
             }
             catch (Exception ex)
             {
-                ULLogger.LogError($"Failed to retrieve Users with Role: {role}. Message: {ex.Message}");
+                ULogger.LogError($"Failed to retrieve Users with Role: {role}. Message: {ex.Message}");
                 return BadRequest($"Failed to retrieve Users with Role: {role}.");
             }
         }
@@ -101,7 +101,7 @@ namespace KitchenManager.API.UsersNS
             }
             catch (Exception ex)
             {
-                ULLogger.LogError($"Failed to retrieve Users. Message: {ex.Message}");
+                ULogger.LogError($"Failed to retrieve Users. Message: {ex.Message}");
                 return BadRequest($"Failed to retrieve Users.");
             }
         }
@@ -116,7 +116,7 @@ namespace KitchenManager.API.UsersNS
             }
             catch (Exception ex)
             {
-                ULLogger.LogError($"Failed to create new User with Email: {model.Email}. Message: {ex}");
+                ULogger.LogError($"Failed to create new User with Email: {model.Email}. Message: {ex}");
                 return BadRequest($"Failed to create new User with Email: {model.Email}.");
             }
         }
@@ -131,7 +131,7 @@ namespace KitchenManager.API.UsersNS
             }
             catch (Exception ex)
             {
-                ULLogger.LogError($"Failed to update information for User with Email: {model.Email}. Message: {ex}");
+                ULogger.LogError($"Failed to update information for User with Email: {model.Email}. Message: {ex}");
                 return BadRequest($"Failed to update information for User with Email: {model.Email}.");
             }
         }
@@ -146,7 +146,7 @@ namespace KitchenManager.API.UsersNS
             }
             catch (Exception ex)
             {
-                ULLogger.LogError($"Failed to assign role {role} to User with Email: {emailAddress}. Message: {ex}");
+                ULogger.LogError($"Failed to assign role {role} to User with Email: {emailAddress}. Message: {ex}");
                 return BadRequest($"Failed to assign role {role} to User with Email: {emailAddress}.");
             }
         }
@@ -161,7 +161,7 @@ namespace KitchenManager.API.UsersNS
             }
             catch (Exception ex)
             {
-                ULLogger.LogError($"Failed to activate account for User with Email: {emailAddress}. Message: {ex}");
+                ULogger.LogError($"Failed to activate account for User with Email: {emailAddress}. Message: {ex}");
                 return BadRequest($"Failed to activate account for User with Email: {emailAddress}.");
             }
         }
@@ -176,7 +176,7 @@ namespace KitchenManager.API.UsersNS
             }
             catch (Exception ex)
             {
-                ULLogger.LogError($"Failed to delete account for User with Email: {emailAddress}. Message: {ex}");
+                ULogger.LogError($"Failed to delete account for User with Email: {emailAddress}. Message: {ex}");
                 return BadRequest($"Failed to delete account for User with Email: {emailAddress}.");
             }
         }
@@ -191,7 +191,7 @@ namespace KitchenManager.API.UsersNS
             }
             catch (Exception ex)
             {
-                ULLogger.LogError($"Failed to permanently delete account for User with Email: {emailAddress}. Message: {ex}");
+                ULogger.LogError($"Failed to permanently delete account for User with Email: {emailAddress}. Message: {ex}");
                 return BadRequest($"Failed to permanently delete account for User with Email: {emailAddress}.");
             }
         }
